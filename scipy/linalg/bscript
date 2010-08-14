@@ -1,0 +1,135 @@
+import os
+import sys
+import re
+import subprocess
+
+from bento.commands.hooks \
+    import \
+        post_configure, recurse, pre_build, post_build
+from bento.commands.configure \
+    import \
+        get_configured_state
+
+from yaku.task_manager \
+    import \
+        set_file_hook, get_extension_hook
+from yaku.task \
+    import \
+        Task
+
+from interface_gen \
+    import \
+        generate_interface
+
+# XXX: copied from f2py tool
+F2PY_MODNAME_MATCH = re.compile(r'\s*python\s*module\s*(?P<name>[\w_]+)',
+                                re.I).match
+F2PY_UMODNAME_MATCH = re.compile(r'\s*python\s*module\s*(?P<name>[\w_]*?'\
+                                     '__user__[\w_]*)',re.I).match
+
+def modulename(node):
+    def _modulename_from_txt(source):
+        name = None
+        for line in source.splitlines():
+            m = F2PY_MODNAME_MATCH(line)
+            if m:
+                if F2PY_UMODNAME_MATCH(line): # skip *__user__* names
+                    continue
+                name = m.group('name')
+                break
+        return name
+    return _modulename_from_txt(node.read())
+
+# Hook to merge all included .pyf together between sending it to f2py
+# this hook is registered for full filenames instead of extension, as
+# the distutils build uses the same extension for both of them
+def hook(self, node):
+    f2py_hook = get_extension_hook(".pyf")
+    base = modulename(node)
+    target = node.parent.declare(base + ".pyf")
+    generate_interface(base, node.abspath(), target.abspath())
+    ret = f2py_hook(self, target)
+    return ret
+
+@post_configure
+def myconfigure(ctx):
+    yctx = ctx.yaku_configure_ctx
+    ldir = os.path.relpath(ctx.local_dir, os.getcwd())
+    set_file_hook(yctx, ldir + "/generic_fblas.pyf",
+                  hook)
+    set_file_hook(yctx, ldir + "/generic_flapack.pyf",
+                  hook)
+    set_file_hook(yctx, ldir + "/generic_cblas.pyf",
+                  hook)
+    set_file_hook(yctx, ldir + "/generic_clapack.pyf",
+                  hook)
+
+    #f2py_hook = get_extension_hook(".pyf")
+    #set_file_hook(yctx, ldir + "/src/det.f", f2py_hook)
+
+def _fortran_wrapper(task_gen, extension, sources, pycc_hook,
+                     pylink_task):
+    bld_root = task_gen.bld.bld_root
+    modname = extension.name.split(".")[-1]
+
+    target = bld_root.declare("scipy/linalg/%smodule.c" % \
+                              modname)
+    fsources = [s for s in sources if s.name.endswith(".f")]
+    build_dir = target.parent.abspath()
+
+    task = Task("f2py_f", inputs=fsources,
+                outputs=[target])
+    task.env_vars = []
+    task.env = task_gen.env
+
+    def f2py_func_from_fortran(task):
+        cmd = [i.path_from(bld_root) for i in task.inputs] \
+              + ["--build-dir", build_dir, "--lower", "-m", modname, "--quiet"]
+        f2py_cmd = [sys.executable, '-c',
+                    "\"from numpy.f2py.f2py2e import run_main;run_main(%s)\"" % repr(cmd)]
+        print " ".join(f2py_cmd)
+        p = subprocess.Popen(" ".join(f2py_cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=task_gen.env["BLDDIR"])
+        for line in p.stdout.readlines():
+            print line.strip()
+        p.wait()
+        assert p.returncode == 0
+
+    task.func = f2py_func_from_fortran
+    task.gen = task_gen
+
+    ctask = pycc_hook(task_gen, target)
+    pylink_task.inputs += ctask[0].outputs
+
+    fobject = bld_root.declare("f2py/fortranobject.c")
+    fobject_task = pycc_hook(task_gen, fobject)
+    pylink_task.inputs += fobject_task[0].outputs
+    return [task] + ctask + fobject_task
+
+def extension_with_fsources(yctx, extension, verbose=False):
+    builder = yctx.builders["pyext"]
+    # XXX: this is an ugly hack - rethink about how to extend builder
+    # method. Maybe extension mapping should be per-task_gen instance
+    # isntead of global ?
+    pycc_hook = __import__(builder.__module__).pycc_hook
+    sources = [yctx.src_root.find_resource(s) \
+               for s in extension.sources]
+
+    tasks = builder.extension(extension.name, sources)
+    task_gen = tasks[0].gen
+
+    pylink_task = None
+    for task in tasks:
+        if task.name == "pylink":
+            pylink_task = task
+            break
+    if pylink_task is None:
+        raise ValueError("No pylink ?")
+    f2py_tasks = _fortran_wrapper(task_gen, extension,
+                                  sources, pycc_hook, pylink_task)
+    yctx.tasks += f2py_tasks
+    return f2py_tasks + tasks
+
+@pre_build
+def myprebuild(ctx):
+    ctx.register_builder("scipy.linalg._flinalg",
+                         extension_with_fsources)

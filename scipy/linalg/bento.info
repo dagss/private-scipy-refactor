@@ -1,0 +1,14 @@
+Library:
+    Extension: cblas
+        Sources:
+            generic_cblas.pyf
+    Extension: flapack
+        Sources:
+            generic_flapack.pyf
+    Extension: clapack
+        Sources:
+            generic_clapack.pyf
+    Extension: _flinalg
+        Sources:
+            src/det.f,
+            src/lu.f

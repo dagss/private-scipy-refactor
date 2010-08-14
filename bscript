@@ -1,0 +1,22 @@
+import os
+
+from bento.commands.hooks \
+    import \
+        post_configure, recurse, pre_build
+
+@recurse(["scipy/linalg/bscript"])
+@post_configure
+def myconfigure(ctx):
+    from numpy.distutils.misc_util import get_numpy_include_dirs
+    yctx = ctx.yaku_configure_ctx
+    yctx.use_tools(["ctasks", "pyext", "fortran"])
+    yctx.use_tools(["numpy_c_template"], ["."])
+    yctx.use_tools(["f2py_tool"], ["."])
+
+    yctx.env["PYEXT_CPPPATH"].append("scipy/fftpack/src")
+    yctx.env["PYEXT_CPPPATH"].extend(get_numpy_include_dirs())
+
+    yctx.env["PYEXT_LIBDIR"].append("scipy/fftpack")
+    yctx.env["PYEXT_LIBDIR"].append("/usr/lib/atlas")
+    #yctx.env["PYEXT_LIBS"].extend(["fftpack", "dfftpack"])
+    yctx.env["PYEXT_LIBS"].extend(["lapack", "blas"])
