@@ -2,14 +2,17 @@ import os
 
 from bento.commands.hooks \
     import \
-        post_configure, recurse, pre_build
+        post_configure, recurse, pre_build, post_build
+from bento.installed_package_description \
+    import \
+        InstalledSection
 
 @recurse(["scipy/linalg/bscript"])
 @post_configure
 def myconfigure(ctx):
     from numpy.distutils.misc_util import get_numpy_include_dirs
     yctx = ctx.yaku_configure_ctx
-    yctx.use_tools(["ctasks", "pyext", "fortran"])
+    yctx.use_tools(["ctasks", "pyext", "fortran", "tpl_tasks"])
     yctx.use_tools(["numpy_c_template"], ["."])
     yctx.use_tools(["f2py_tool"], ["."])
 
@@ -20,3 +23,25 @@ def myconfigure(ctx):
     yctx.env["PYEXT_LIBDIR"].append("/usr/lib/atlas")
     #yctx.env["PYEXT_LIBS"].extend(["fftpack", "dfftpack"])
     yctx.env["PYEXT_LIBS"].extend(["lapack", "blas"])
+
+    yctx.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
+                              "VERSION": "'0.8.0'",
+                              "RELEASE": "False"}
+
+@post_build
+def mybuild(ctx):
+    # Produce generated files
+    templater = ctx.yaku_build_ctx.builders["tpl_tasks"]
+    templater.build("version", ["scipy/version.py.in"])
+    templater.build("__config__", ["scipy/__config__.py.in"])
+
+    section_writer = ctx.cmd.section_writer
+    section = InstalledSection(
+                  "gen_pythonfiles",
+                  "library",
+                  os.path.join("$_srcrootdir",
+                               ctx.yaku_build_ctx.env["BLDDIR"]),
+                  "$sitedir",
+                  [os.path.join("scipy", "version.py"),
+                   os.path.join("scipy", "__config__.py")])
+    section_writer.sections["pythonfiles"]["gen_files"] = section
