@@ -72,7 +72,8 @@ def f2py_hook(self, node):
         # HACK: we write an empty file to force the file to exist if
         # f2py does not generate it (automatically detecting cases
         # where f2py generates / does not generate is too complicated)
-        fwrap.write("")
+        if not os.path.exists(fwrap.abspath()):
+            fwrap.write("")
 
         ensure_dir(target.name)
         
