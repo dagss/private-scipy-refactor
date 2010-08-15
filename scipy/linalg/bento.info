@@ -1,4 +1,8 @@
 Library:
+    Extension: fblas
+        Sources:
+            generic_fblas.pyf,
+            src/fblaswrap.f
     Extension: cblas
         Sources:
             generic_cblas.pyf
@@ -12,3 +16,6 @@ Library:
         Sources:
             src/det.f,
             src/lu.f
+    Extension: calc_lwork
+        Sources:
+            src/calc_lwork.f

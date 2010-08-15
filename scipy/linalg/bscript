@@ -87,7 +87,6 @@ def _fortran_wrapper(task_gen, extension, sources, pycc_hook,
               + ["--build-dir", build_dir, "--lower", "-m", modname, "--quiet"]
         f2py_cmd = [sys.executable, '-c',
                     "\"from numpy.f2py.f2py2e import run_main;run_main(%s)\"" % repr(cmd)]
-        print " ".join(f2py_cmd)
         p = subprocess.Popen(" ".join(f2py_cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=task_gen.env["BLDDIR"])
         for line in p.stdout.readlines():
             print line.strip()
@@ -132,4 +131,6 @@ def extension_with_fsources(yctx, extension, verbose=False):
 @pre_build
 def myprebuild(ctx):
     ctx.register_builder("scipy.linalg._flinalg",
+                         extension_with_fsources)
+    ctx.register_builder("scipy.linalg.calc_lwork",
                          extension_with_fsources)
