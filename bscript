@@ -1,5 +1,11 @@
 import os
 
+try:
+    import numpy
+except ImportError:
+    raise ValueError("You should install numpy before building scipy")
+
+from numpy.distutils.misc_util import get_numpy_include_dirs
 from bento.commands.hooks \
     import \
         post_configure, recurse, pre_build, post_build
@@ -7,33 +13,37 @@ from bento.installed_package_description \
     import \
         InstalledSection
 
+#@recurse(["scipy/special/bscript", "scipy/linalg/bscript"])
 @recurse(["scipy/linalg/bscript"])
 @post_configure
 def myconfigure(ctx):
-    from numpy.distutils.misc_util import get_numpy_include_dirs
-    yctx = ctx.yaku_configure_ctx
-    yctx.use_tools(["ctasks", "pyext", "fortran", "tpl_tasks"])
-    yctx.use_tools(["numpy_c_template"], ["."])
-    yctx.use_tools(["f2py_tool"], ["."])
+    cfg = ctx.yaku_configure_ctx
 
-    yctx.env["PYEXT_CPPPATH"].append("scipy/fftpack/src")
-    yctx.env["PYEXT_CPPPATH"].extend(get_numpy_include_dirs())
+    cfg.use_tools(["ctasks", "pyext", "fortran", "tpl_tasks"])
+    cfg.use_tools(["numpy_c_template"], ["."])
+    cfg.use_tools(["f2py_tool"], ["."])
 
-    yctx.env["PYEXT_LIBDIR"].append("scipy/fftpack")
-    yctx.env["PYEXT_LIBDIR"].append("/usr/lib/atlas")
-    #yctx.env["PYEXT_LIBS"].extend(["fftpack", "dfftpack"])
-    yctx.env["PYEXT_LIBS"].extend(["lapack", "blas"])
+    # cfg.env["PYEXT_CPPPATH"].append("scipy/fftpack/src")
+    cfg.env["PYEXT_CPPPATH"].extend(get_numpy_include_dirs())
 
-    yctx.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
-                              "VERSION": "'0.8.0'",
-                              "RELEASE": "False"}
+    # cfg.env["PYEXT_LIBDIR"].append("scipy/fftpack")
+    #cfg.env["PYEXT_LIBDIR"].append("/usr/lib/atlas")
+    # #cfg.env["PYEXT_LIBS"].extend(["fftpack", "dfftpack"])
+    #cfg.env["PYEXT_LIBS"].extend(["lapack", "blas"])
+
+    cfg.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
+                             "VERSION": "'0.8.0'",
+                             "RELEASE": "False"}
+    cfg.env["VERBOSE"] = True
 
 @post_build
 def mybuild(ctx):
     # Produce generated files
     templater = ctx.yaku_build_ctx.builders["tpl_tasks"]
-    templater.build("version", ["scipy/version.py.in"])
-    templater.build("__config__", ["scipy/__config__.py.in"])
+    tasks = templater.build("version", ["scipy/version.py.in"])
+    tasks += templater.build("__config__", ["scipy/__config__.py.in"])
+    #bld = ctx.yaku_build_ctx
+    #bld.tasks += tasks
 
     section_writer = ctx.cmd.section_writer
     section = InstalledSection(

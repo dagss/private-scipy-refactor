@@ -35,10 +35,10 @@ Classifiers:
     Operating System :: Unix,
     Operating System :: MacOS
 
+HookFile: bscript
+
 Subento:
     scipy/linalg
-
-HookFile: bscript
 
 DataFiles: tests
     TargetDir: $sitedir/scipy
