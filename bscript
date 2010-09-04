@@ -12,6 +12,9 @@ from bento.commands.hooks \
 from bento.installed_package_description \
     import \
         InstalledSection
+from yaku.conftests.fconftests \
+    import \
+        check_fortran_verbose_flag, check_fortran_runtime_flags
 
 #@recurse(["scipy/special/bscript", "scipy/linalg/bscript"])
 @recurse(["scipy/linalg/bscript"])
@@ -36,6 +39,8 @@ def myconfigure(ctx):
                              "RELEASE": "False"}
     cfg.env["VERBOSE"] = True
 
+    check_fortran_verbose_flag(cfg)
+    check_fortran_runtime_flags(cfg)
 @post_build
 def mybuild(ctx):
     # Produce generated files
