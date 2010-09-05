@@ -70,7 +70,11 @@ def myconfigure(ctx):
     if sys.platform == "darwin":
         cfg.env["BLAS"] = {"FRAMEWORKS": ["Accelerate"]}
         cfg.env["LAPACK"] = {"FRAMEWORKS": ["Accelerate"]}
-    
+
+        for arch in ["i386"]:
+            cfg.env["F77FLAGS"].extend(["-arch", arch])
+            cfg.env["CFLAGS"].extend(["-arch", arch])
+            cfg.env["LINKFLAGS"].extend(["-arch", arch])
     else:
         cfg.env["BLAS"] = {"LIBDIR": ["/usr/lib/atlas"], "LIBS": ["blas"]}
         cfg.env["BLAS"] = {"LIBDIR": ["/usr/lib/atlas"], "LIBS": ["lapack", "blas"]}
