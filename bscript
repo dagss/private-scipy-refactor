@@ -88,7 +88,7 @@ def myconfigure(ctx):
     check_fortran_verbose_flag(cfg)
     check_fortran_runtime_flags(cfg)
 
-@post_build
+@pre_build
 def mybuild(ctx):
     # Produce generated files
     templater = ctx.yaku_build_ctx.builders["tpl_tasks"]
