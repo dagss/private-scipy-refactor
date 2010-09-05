@@ -60,13 +60,8 @@ def myconfigure(ctx):
     cfg.use_tools(["numpy_c_template"], ["."])
     cfg.use_tools(["f2py_tool"], ["."])
 
-    # cfg.env["PYEXT_CPPPATH"].append("scipy/fftpack/src")
     cfg.env["PYEXT_CPPPATH"].extend(get_numpy_include_dirs())
 
-    # cfg.env["PYEXT_LIBDIR"].append("scipy/fftpack")
-    #cfg.env["PYEXT_LIBDIR"].append("/usr/lib/atlas")
-    # #cfg.env["PYEXT_LIBS"].extend(["fftpack", "dfftpack"])
-    #cfg.env["PYEXT_LIBS"].extend(["lapack", "blas"])
     if sys.platform == "darwin":
         cfg.env["BLAS"] = {"FRAMEWORKS": ["Accelerate"]}
         cfg.env["LAPACK"] = {"FRAMEWORKS": ["Accelerate"]}
@@ -90,12 +85,9 @@ def myconfigure(ctx):
 
 @pre_build
 def mybuild(ctx):
-    # Produce generated files
     templater = ctx.yaku_build_ctx.builders["tpl_tasks"]
     tasks = templater.build("version", ["scipy/version.py.in"])
     tasks += templater.build("__config__", ["scipy/__config__.py.in"])
-    #bld = ctx.yaku_build_ctx
-    #bld.tasks += tasks
 
     section_writer = ctx.cmd.section_writer
     section = InstalledSection(
