@@ -1,4 +1,6 @@
 import os
+import sys
+import copy
 
 try:
     import numpy
@@ -12,9 +14,41 @@ from bento.commands.hooks \
 from bento.installed_package_description \
     import \
         InstalledSection
+from yaku.conftests.conftests \
+    import \
+        check_compiler
 from yaku.conftests.fconftests \
     import \
-        check_fortran_verbose_flag, check_fortran_runtime_flags
+        check_fortran_verbose_flag, check_fortran_runtime_flags, check_fcompiler
+
+def check_archs(cfg):
+    archs = {"i386": False, "x86_64": False, "ppc": False, "ppc64": False}
+    for arch in archs:
+        old_cflags = copy.deepcopy(cfg.env["CFLAGS"])
+        old_linkflags = copy.deepcopy(cfg.env["LINKFLAGS"])
+        try:
+            cfg.env["CFLAGS"].extend(["-arch", arch])
+            cfg.env["LINKFLAGS"].extend(["-arch", arch])
+            if check_compiler(cfg, "Checking whether gcc supports arch %s" % arch):
+                archs[arch] = True
+        finally:
+            cfg.env["CFLAGS"] = old_cflags
+            cfg.env["LINKFLAGS"] = old_linkflags
+
+    for arch in archs:
+        if archs[arch]:
+            old_fflags = copy.deepcopy(cfg.env["F77FLAGS"])
+            old_linkflags = copy.deepcopy(cfg.env["LINKFLAGS"])
+            try:
+                cfg.env["F77FLAGS"].extend(["-arch", arch])
+                cfg.env["LINKFLAGS"].extend(["-arch", arch])
+                if check_fcompiler(cfg, "Checking whether gfortran supports arch %s" % arch):
+                    archs[arch] = True
+            finally:
+                cfg.env["F77FLAGS"] = old_fflags
+                cfg.env["LINKFLAGS"] = old_linkflags
+
+    return archs.keys()
 
 #@recurse(["scipy/special/bscript", "scipy/linalg/bscript"])
 @recurse(["scipy/linalg/bscript"])
