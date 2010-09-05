@@ -59,10 +59,10 @@ def includes(filename):
         fid.close()
 
 @extension(".pyf")
-def f2py_task(self, node):
-    return f2py_hook(self, node)
-
 def f2py_hook(self, node):
+    return f2py_task(self, node)
+
+def f2py_task(self, node):
     fobject = self.bld.bld_root.declare("f2py/fortranobject.c")
     if node.suffix() == ".pyf":
         modname =  modulename(node)
@@ -134,7 +134,6 @@ def f2py_fortran_sources_extension(bld, extension, verbose):
     You can use this directly as a callback when registering builder
     """
     # FIXME: make tools modules available from yaku build context
-    f2py_tool = __import__("f2py_tool")
     pyext = __import__("pyext")
 
     builder = bld.builders["pyext"]
@@ -150,8 +149,7 @@ def f2py_fortran_sources_extension(bld, extension, verbose):
         tasks = builder.extension(extension.name, sources)
         task_gen = tasks[0].gen
 
-        f2py_tasks = f2py_tool.f2py_hook_fsources(task_gen, modname,
-                                                  fsources)
+        f2py_tasks = f2py_hook_fsources(task_gen, modname, fsources)
         tasks += f2py_tasks
         bld.tasks += tasks
         return tasks
