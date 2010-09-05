@@ -41,8 +41,8 @@ def myprebuild(ctx):
 
     def custom_env_builder(bld, extension, verbose):
         builder = bld.builders["pyext"].clone()
-        builder.env["PYEXT_LIBDIR"].append("/usr/lib/atlas")
-        builder.env["PYEXT_LIBS"].extend(["lapack", "blas"])
+        for flag in bld.env["LAPACK"]:
+            builder.env["PYEXT_%s" % flag].extend(bld.env["LAPACK"][flag])
         return builder.extension(extension.name,
                 extension.sources)
 

@@ -67,6 +67,14 @@ def myconfigure(ctx):
     #cfg.env["PYEXT_LIBDIR"].append("/usr/lib/atlas")
     # #cfg.env["PYEXT_LIBS"].extend(["fftpack", "dfftpack"])
     #cfg.env["PYEXT_LIBS"].extend(["lapack", "blas"])
+    if sys.platform == "darwin":
+        cfg.env["BLAS"] = {"FRAMEWORKS": ["Accelerate"]}
+        cfg.env["LAPACK"] = {"FRAMEWORKS": ["Accelerate"]}
+    
+    else:
+        cfg.env["BLAS"] = {"LIBDIR": ["/usr/lib/atlas"], "LIBS": ["blas"]}
+        cfg.env["BLAS"] = {"LIBDIR": ["/usr/lib/atlas"], "LIBS": ["lapack", "blas"]}
+
 
     cfg.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
                              "VERSION": "'0.8.0'",
@@ -75,6 +83,7 @@ def myconfigure(ctx):
 
     check_fortran_verbose_flag(cfg)
     check_fortran_runtime_flags(cfg)
+
 @post_build
 def mybuild(ctx):
     # Produce generated files
