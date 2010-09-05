@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 import re
 import shutil
 import subprocess
@@ -127,35 +128,6 @@ def f2py_hook_fsources(self, modname, nodes):
 
     return [task] + ctasks
 
-def f2py_fortran_sources_extension(bld, extension, verbose):
-    """Python extension builder with fortran sources, with f2py hooked
-    in the middle to build the f->c wrapper(s).
-    
-    You can use this directly as a callback when registering builder
-    """
-    # FIXME: make tools modules available from yaku build context
-    pyext = __import__("pyext")
-
-    builder = bld.builders["pyext"]
-
-    old_hook = get_extension_hook(".c")
-    set_extension_hook(".c", pyext.pycc_hook)
-    try:
-        sources = [bld.src_root.find_resource(s) \
-                   for s in extension.sources]
-        fsources = [node for node in sources if node.suffix() == ".f"]
-        modname = extension.name.split(".")[-1]
-
-        tasks = builder.extension(extension.name, sources)
-        task_gen = tasks[0].gen
-
-        f2py_tasks = f2py_hook_fsources(task_gen, modname, fsources)
-        tasks += f2py_tasks
-        bld.tasks += tasks
-        return tasks
-    finally:
-        set_extension_hook(".c", old_hook)
-
 def f2py_func(task, extra_cmd=None):
     if extra_cmd is None:
         extra_cmd = []
@@ -193,3 +165,48 @@ def configure(ctx):
 
     ctx.env["PYEXT_CPPPATH"].append(f2py_dir.get_bld().abspath())
     ctx.env["F2PYFLAGS"] = []
+
+from yaku.tools.ctasks import _merge_env
+class F2pyBuilder(object):
+    def clone(self):
+        return F2pyBuilder(self.ctx)
+
+    def __init__(self, ctx):
+        self.ctx = ctx
+        self.env = copy.deepcopy(ctx.env)
+
+    def extension_fsources(self, name, sources, env=None):
+        env = _merge_env(self.env, env)
+        return create_extension_fsources(self.ctx, name, sources, env)
+
+def create_extension_fsources(bld, name, sources, env):
+    """Python extension builder with fortran sources, with f2py hooked
+    in the middle to build the f->c wrapper(s).
+    
+    You can use this directly as a callback when registering builder
+    """
+    # FIXME: make tools modules available from yaku build context
+    pyext = __import__("pyext")
+
+    builder = bld.builders["pyext"]
+
+    old_hook = get_extension_hook(".c")
+    set_extension_hook(".c", pyext.pycc_hook)
+    try:
+        sources = [bld.src_root.find_resource(s) \
+                   for s in sources]
+        fsources = [node for node in sources if node.suffix() == ".f"]
+        modname = name.split(".")[-1]
+
+        tasks = builder.extension(name, sources)
+        task_gen = tasks[0].gen
+
+        f2py_tasks = f2py_hook_fsources(task_gen, modname, fsources)
+        tasks += f2py_tasks
+        bld.tasks += tasks
+        return tasks
+    finally:
+        set_extension_hook(".c", old_hook)
+
+def get_builder(ctx):
+    return F2pyBuilder(ctx)
