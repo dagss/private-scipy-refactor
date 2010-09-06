@@ -38,15 +38,19 @@ Classifiers:
 HookFile: bscript
 
 Subento:
-    scipy/linalg
+    scipy/linalg,
+    scipy/special
 
 DataFiles: tests
     TargetDir: $sitedir/scipy
     SourceDir: scipy
     Files:
-        linalg/tests/*.py
+        linalg/tests/*.py,
+        special/tests/*.py,
+        special/tests/data/boost.npz
 
 Library:
     Packages:
         scipy,
-        scipy.linalg
+        scipy.linalg,
+        scipy.special
