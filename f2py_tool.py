@@ -175,30 +175,33 @@ class F2pyBuilder(object):
         self.ctx = ctx
         self.env = copy.deepcopy(ctx.env)
 
+        # FIXME: make tools modules available from yaku build context
+        self.pyext = __import__("pyext")
+        self.pyext_builder = ctx.builders["pyext"].clone()
+
     def extension_fsources(self, name, sources, env=None):
         env = _merge_env(self.env, env)
-        return create_extension_fsources(self.ctx, name, sources, env)
+        return create_extension_fsources(self, name, sources, env)
 
-def create_extension_fsources(bld, name, sources, env):
+def create_extension_fsources(f2py_builder, name, sources, env):
     """Python extension builder with fortran sources, with f2py hooked
     in the middle to build the f->c wrapper(s).
     
     You can use this directly as a callback when registering builder
     """
-    # FIXME: make tools modules available from yaku build context
-    pyext = __import__("pyext")
-
-    builder = bld.builders["pyext"]
+    bld = f2py_builder.ctx
+    pyext = f2py_builder.pyext_builder
+    pyext.env = env
 
     old_hook = get_extension_hook(".c")
-    set_extension_hook(".c", pyext.pycc_hook)
+    set_extension_hook(".c", f2py_builder.pyext.pycc_hook)
     try:
         sources = [bld.src_root.find_resource(s) \
                    for s in sources]
         fsources = [node for node in sources if node.suffix() == ".f"]
         modname = name.split(".")[-1]
 
-        tasks = builder.extension(name, sources)
+        tasks = pyext.extension(name, sources)
         task_gen = tasks[0].gen
 
         f2py_tasks = f2py_hook_fsources(task_gen, modname, fsources)
