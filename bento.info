@@ -38,6 +38,7 @@ Classifiers:
 HookFile: bscript
 
 Subento:
+    scipy/fftpack,
     scipy/linalg,
     scipy/special
 
@@ -45,6 +46,7 @@ DataFiles: tests
     TargetDir: $sitedir/scipy
     SourceDir: scipy
     Files:
+        fftpack/tests/*.py,
         linalg/tests/*.py,
         special/tests/*.py,
         special/tests/data/boost.npz
@@ -52,5 +54,6 @@ DataFiles: tests
 Library:
     Packages:
         scipy,
+        scipy.fftpack,
         scipy.linalg,
         scipy.special

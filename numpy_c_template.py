@@ -17,24 +17,17 @@ import yaku.errors
 
 @extension(".src")
 def c_src_template_task(self, node):
-    base = os.path.splitext(node)[0]
-    target = os.path.join(self.env["BLDDIR"], base)
-    ensure_dir(target)
-    task = Task("numpy_c_template", inputs=node, outputs=target)
+    out = node.change_ext("")
+    target = node.parent.declare(out.name)
+    ensure_dir(target.name)
+    task = Task("numpy_c_template", inputs=[node], outputs=[target])
+    task.gen = self
     task.env_vars = []
     task.env = self.env
 
     def yo(t):
-        f = open(node)
-        try:
-            print "%s -> %s" % (node, target)
-            oid = open(target, "w")
-            try:
-                oid.write(process_str(f.read()))
-            finally:
-                oid.close()
-        finally:
-            f.close()
+        cnt = t.inputs[0].read()
+        t.outputs[0].write(process_str(cnt))
 
     task.func = yo
     compile_task = get_extension_hook(".c")
