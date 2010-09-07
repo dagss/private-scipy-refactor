@@ -39,21 +39,32 @@ HookFile: bscript
 
 Subento:
     scipy/fftpack,
+    scipy/integrate,
     scipy/linalg,
-    scipy/special
+    scipy/optimize,
+    scipy/special,
+    scipy/stats
 
 DataFiles: tests
     TargetDir: $sitedir/scipy
     SourceDir: scipy
     Files:
         fftpack/tests/*.py,
+        integrate/tests/*.py,
         linalg/tests/*.py,
+        optimize/tests/*.py,
         special/tests/*.py,
-        special/tests/data/boost.npz
+        special/tests/data/boost.npz,
+        stats/tests/*.py
 
 Library:
     Packages:
         scipy,
+        scipy.constants,
         scipy.fftpack,
+        scipy.integrate,
         scipy.linalg,
-        scipy.special
+        scipy.misc,
+        scipy.optimize,
+        scipy.special,
+        scipy.stats

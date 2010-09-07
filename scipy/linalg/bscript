@@ -78,3 +78,10 @@ def myprebuild(ctx):
 
     for name in ctx.local_pkg.extensions:
         ctx.register_environment(name, env)
+
+    f2py = bld.builders["f2py_tool"]
+    def builder(bld, extension, verbose):
+        return f2py.extension_fsources(extension.name,
+                extension.sources, env)
+    ctx.register_builder("calc_lwork", builder)
+    ctx.register_builder("_flinalg", builder)

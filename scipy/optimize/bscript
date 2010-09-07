@@ -1,0 +1,30 @@
+import copy
+from distutils import sysconfig
+
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {}
+    for flag in bld.env["LAPACK"]:
+        env["PYEXT_%s" % flag] = bld.env["LAPACK"][flag]
+    env["PYEXT_SHLINKFLAGS"] = bld.env["FC_RUNTIME_LDFLAGS"]
+    env["PYEXT_LIBDIR"].append(ctx.local_node.path_from(ctx.top_node))
+    env["PYEXT_LIBS"].extend(['minpack', "rootfind"])
+
+    for name in ctx.local_pkg.extensions:
+        ctx.register_environment(name, env)
+
+    #minpack_env = copy.deepcopy(env)
+    #ctx.register_environment("_minpack", minpack_env)
+
+    #bld = ctx.yaku_build_ctx
+    #f2py = bld.builders["f2py_tool"]
+    #def builder(bld, extension, verbose):
+    #    return f2py.extension_fsources(extension.name,
+    #            extension.sources, env)
+    #ctx.register_builder("futil", builder)

@@ -1,0 +1,21 @@
+import copy
+from distutils import sysconfig
+
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {}
+    for flag in bld.env["BLAS"]:
+        env["PYEXT_%s" % flag] = bld.env["LAPACK"][flag]
+    env["PYEXT_SHLINKFLAGS"] = bld.env["FC_RUNTIME_LDFLAGS"]
+    env["PYEXT_LIBDIR"].append(ctx.local_node.path_from(ctx.top_node))
+    env["PYEXT_LIBS"].extend(["dop", "odepack", "quadpack", "linpack_lite",
+        "mach"])
+
+    for name in ctx.local_pkg.extensions:
+        ctx.register_environment(name, env)

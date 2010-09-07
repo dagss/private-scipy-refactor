@@ -1,0 +1,28 @@
+Library:
+    CompiledLibrary: linpack_lite
+        Sources:
+            linpack_lite/*.f 
+    CompiledLibrary: mach
+        Sources:
+            mach/*.f 
+    CompiledLibrary: quadpack
+        Sources:
+            quadpack/*.f 
+    CompiledLibrary: dop
+        Sources:
+            dop/*.f 
+    CompiledLibrary: odepack
+        Sources:
+            odepack/*.f
+    Extension: _quadpack
+        Sources:
+            _quadpackmodule.c
+    Extension: _odepack
+        Sources:
+            _odepackmodule.c
+    Extension: vode
+        Sources:
+            vode.pyf
+    Extension: _dop
+        Sources:
+            dop.pyf

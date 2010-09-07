@@ -51,7 +51,8 @@ def check_archs(cfg):
     return archs.keys()
 
 @recurse(["scipy/fftpack/bscript", "scipy/special/bscript",
-          "scipy/linalg/bscript"])
+          "scipy/linalg/bscript", "scipy/stats/bscript",
+          "scipy/optimize/bscript", "scipy/integrate/bscript"])
 @post_configure
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
