@@ -1,0 +1,9 @@
+Library:
+    CompiledLibrary: arpack
+        Sources:
+            ARPACK/SRC/*.f,
+            ARPACK/UTIL/*.f,
+            ARPACK/FWRAPPERS/dummy.f
+    Extension: _arpack
+        Sources:
+            arpack.pyf.src

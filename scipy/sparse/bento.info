@@ -1,0 +1,8 @@
+Subento:
+    sparsetools,
+    linalg
+
+Library:
+    Packages:
+        sparsetools,
+        linalg

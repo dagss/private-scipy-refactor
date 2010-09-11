@@ -42,6 +42,7 @@ Subento:
     scipy/integrate,
     scipy/linalg,
     scipy/optimize,
+    scipy/sparse,
     scipy/special,
     scipy/stats
 

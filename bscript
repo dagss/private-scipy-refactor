@@ -52,12 +52,16 @@ def check_archs(cfg):
 
 @recurse(["scipy/fftpack/bscript", "scipy/special/bscript",
           "scipy/linalg/bscript", "scipy/stats/bscript",
-          "scipy/optimize/bscript", "scipy/integrate/bscript"])
+          "scipy/optimize/bscript", "scipy/integrate/bscript",
+          "scipy/sparse/linalg/dsolve/bscript",
+          "scipy/sparse/linalg/eigen/arpack/bscript",
+          ])
 @post_configure
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
 
     cfg.use_tools(["ctasks", "pyext", "fortran", "tpl_tasks"])
+    cfg.use_tools(["cxxtasks"])
     cfg.use_tools(["numpy_c_template"], ["."])
     cfg.use_tools(["f2py_tool"], ["."])
 

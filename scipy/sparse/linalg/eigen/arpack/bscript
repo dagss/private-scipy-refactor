@@ -1,0 +1,21 @@
+import copy
+
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build
+def mybuild(ctx):
+    #cpppath = ctx.local_node.find_node("SuperLU").find_node("SRC")
+    #env = {"CPPPATH": [cpppath.abspath()],
+    #       "CFLAGS": ["-DUSE_VENDOR_BLAS=2"]}
+    #ctx.register_clib_environment("superlu_src", env)
+
+    bld = ctx.yaku_build_ctx
+    env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:],
+           "PYEXT_LIBS": ["arpack"],
+           "PYEXT_LIBDIR": [ctx.local_node.path_from(ctx.top_node)]}
+    for flag in bld.env["LAPACK"]:
+        var = env.get("PYEXT_%s" % flag, [])
+        var.extend(copy.deepcopy(bld.env["LAPACK"][flag]))
+    ctx.register_environment("arpack", env)

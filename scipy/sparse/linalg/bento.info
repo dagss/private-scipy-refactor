@@ -1,0 +1,8 @@
+Subento:
+    dsolve,
+    eigen/arpack
+
+Library:
+    Packages:
+        dsolve,
+        eigen

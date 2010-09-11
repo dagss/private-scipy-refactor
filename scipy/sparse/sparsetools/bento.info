@@ -1,0 +1,13 @@
+Library:
+    Extension: csr
+        Sources: csr_wrap.cxx
+    Extension: csc
+        Sources: csc_wrap.cxx
+    Extension: coo
+        Sources: coo_wrap.cxx
+    Extension: bsrc
+        Sources: bsr_wrap.cxx
+    Extension: dia
+        Sources: dia_wrap.cxx
+    Extension: csgraph
+        Sources: csgraph_wrap.cxx
