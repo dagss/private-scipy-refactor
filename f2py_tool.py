@@ -42,7 +42,12 @@ def modulename(node):
                 name = m.group('name')
                 break
         return name
-    return _modulename_from_txt(node.read())
+    try:
+        cnt = node.read()
+        return _modulename_from_txt(cnt)
+    except IOError:
+        return os.path.splitext(node.name)[0]
+
 
 def includes(filename):
     def _includes_from_txt(source):
@@ -66,7 +71,7 @@ def f2py_hook(self, node):
 def f2py_task(self, node):
     fobject = self.bld.bld_root.declare("f2py/fortranobject.c")
     if node.suffix() == ".pyf":
-        modname =  modulename(node)
+        modname = os.path.splitext(node.name)[0]
         target = node.parent.declare(modname + "module.c")
         fwrap = node.parent.declare(FWRAP_TEMPLATE % modname)
         # HACK: we write an empty file to force the file to exist if
@@ -84,12 +89,7 @@ def f2py_task(self, node):
 
         task.func = f2py_func
         task.gen = self
-        compile_task = get_extension_hook(".c")
-        fcompile_task = get_extension_hook(".f")
-        ctask = compile_task(self, target)
-        ctask += compile_task(self, fobject)
-        ctask += fcompile_task(self, fwrap)
-        return [task] + ctask
+        return [task]
     else:
         raise ValueError(
                 "Do not know how to handle extension %s in f2py tool")
@@ -118,26 +118,21 @@ def f2py_hook_fsources(self, modname, nodes):
     task.func = lambda task: f2py_func(task, 
                                        ["--lower", "-m", modname])
     task.gen = self
-    compile_task = get_extension_hook(".c")
-    fcompile_task = get_extension_hook(".f")
-    ctasks = compile_task(self, target)
-    ctasks += compile_task(self, fobject)
-    ctasks += fcompile_task(self, fwrap)
-
-    self.add_objects(ctasks)
-
-    return [task] + ctasks
+    return [task]
 
 def f2py_func(task, extra_cmd=None):
     if extra_cmd is None:
         extra_cmd = []
     build_dir = task.outputs[0].parent.abspath()
+    coutput = task.outputs[0].name
+    f2py_wrapper = task.outputs[1].name
     cmd = [i.path_from(task.gen.bld.bld_root) for i in task.inputs] \
           + ["--build-dir", build_dir] + task.env["F2PYFLAGS"] \
-          + extra_cmd
+          + ["--coutput", coutput, "--f2py-wrapper-output", f2py_wrapper] + \
+          extra_cmd
     f2py_cmd = [sys.executable, '-c',
                 "\"from numpy.f2py.f2py2e import run_main;" \
-                "run_main(%s)\"" % repr(cmd)]
+                "run_main(%s, True)\"" % repr(cmd)]
     if task.env["VERBOSE"]:
         print " ".join(f2py_cmd)
     else:
