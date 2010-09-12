@@ -1,21 +1,52 @@
-import copy
+from numpy.distutils.from_template \
+    import \
+        process_str
 
 from bento.commands.hooks \
     import \
-        pre_build
+        pre_build, post_configure
+from yaku.task_manager \
+    import \
+        set_file_hook, get_extension_hook
+from yaku.task \
+    import \
+        Task
+
+def hook(ctx, node):
+    return f_src_template_task(ctx, node)
+
+def f_src_template_task(self, node):
+    out = node.change_ext("")
+    target = node.parent.declare(out.name)
+    task = Task("numpy_f_template", inputs=[node], outputs=[target])
+    task.gen = self
+    task.env_vars = []
+    task.env = self.env
+
+    def yo(t):
+        cnt = t.inputs[0].read()
+        print "F TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
+        t.outputs[0].write(process_str(cnt))
+
+    task.func = yo
+    return [task]
+
+@post_configure
+def myconfigure(ctx):
+    cfg = ctx.yaku_configure_ctx
+    ldir = ctx.local_node.path_from(ctx.top_node)
+
+    set_file_hook(cfg, ldir + "/arpack.pyf.src", hook)
 
 @pre_build
 def mybuild(ctx):
-    #cpppath = ctx.local_node.find_node("SuperLU").find_node("SRC")
-    #env = {"CPPPATH": [cpppath.abspath()],
-    #       "CFLAGS": ["-DUSE_VENDOR_BLAS=2"]}
-    #ctx.register_clib_environment("superlu_src", env)
-
     bld = ctx.yaku_build_ctx
+    ldir = ctx.local_node.path_from(ctx.top_node)
+
     env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:],
            "PYEXT_LIBS": ["arpack"],
-           "PYEXT_LIBDIR": [ctx.local_node.path_from(ctx.top_node)]}
+           "PYEXT_LIBDIR": [ldir]}
     for flag in bld.env["LAPACK"]:
         var = env.get("PYEXT_%s" % flag, [])
-        var.extend(copy.deepcopy(bld.env["LAPACK"][flag]))
-    ctx.register_environment("arpack", env)
+        var.extend(bld.env["LAPACK"][flag][:])
+    ctx.register_environment("_arpack", env)
