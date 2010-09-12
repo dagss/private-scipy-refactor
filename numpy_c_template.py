@@ -27,12 +27,11 @@ def c_src_template_task(self, node):
 
     def yo(t):
         cnt = t.inputs[0].read()
+        print "C TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
         t.outputs[0].write(process_str(cnt))
 
     task.func = yo
-    compile_task = get_extension_hook(".c")
-    ctask = compile_task(self, target)
-    return [task] + ctask
+    return [task]
 
 __all__ = ['process_str', 'process_file']
 
