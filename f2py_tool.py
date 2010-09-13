@@ -118,7 +118,18 @@ def f2py_hook_fsources(self, modname, nodes):
     task.func = lambda task: f2py_func(task, 
                                        ["--lower", "-m", modname])
     task.gen = self
-    return [task]
+
+    # We create tasks manually because list of .f -> extension does
+    # not fit the yaku model of one file -> one task. Here, several
+    # tasks share the same parameters (module names, etc..)
+    compile_task = get_extension_hook(".c")
+    fcompile_task = get_extension_hook(".f")
+    ctasks = compile_task(self, target)
+    ctasks += compile_task(self, fobject)
+    ctasks += fcompile_task(self, fwrap)
+
+    self.add_objects(ctasks)
+    return [task] + ctasks
 
 def f2py_func(task, extra_cmd=None):
     if extra_cmd is None:
