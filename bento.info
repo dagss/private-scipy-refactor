@@ -40,6 +40,7 @@ HookFile: bscript
 Subento:
     scipy/fftpack,
     scipy/integrate,
+    scipy/lib,
     scipy/linalg,
     scipy/optimize,
     scipy/sparse,
@@ -72,6 +73,7 @@ Library:
         scipy.constants,
         scipy.fftpack,
         scipy.integrate,
+        scipy.lib,
         scipy.linalg,
         scipy.misc,
         scipy.optimize,

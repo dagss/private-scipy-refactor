@@ -52,6 +52,7 @@ def check_archs(cfg):
 
 @recurse(["scipy/fftpack/bscript", "scipy/special/bscript",
           "scipy/linalg/bscript", "scipy/stats/bscript",
+          "scipy/lib/blas/bscript",
           "scipy/optimize/bscript", "scipy/integrate/bscript",
           "scipy/sparse/linalg/dsolve/bscript",
           "scipy/sparse/linalg/eigen/arpack/bscript",

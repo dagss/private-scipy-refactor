@@ -1,0 +1,8 @@
+Subento:
+    blas,
+    lapack
+
+Library:
+    Packages:
+        blas,
+        lapack
