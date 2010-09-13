@@ -145,7 +145,7 @@ def f2py_func(task, extra_cmd=None):
                 "\"from numpy.f2py.f2py2e import run_main;" \
                 "run_main(%s, True)\"" % repr(cmd)]
     if task.env["VERBOSE"]:
-        print " ".join(f2py_cmd)
+        print "F2PY: %s" % " ".join(f2py_cmd)
     else:
         print "F2PY         %s" % " ".join([str(i) for i in task.inputs])
     p = subprocess.Popen(" ".join(f2py_cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=task.env["BLDDIR"])
