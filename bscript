@@ -65,7 +65,7 @@ def myconfigure(ctx):
 
     cfg.use_tools(["ctasks", "pyext", "fortran", "tpl_tasks"])
     cfg.use_tools(["cxxtasks"])
-    cfg.use_tools(["numpy_c_template"], ["."])
+    cfg.use_tools(["numpy_templates"], ["."])
     cfg.use_tools(["f2py_tool"], ["."])
 
     cfg.env["PYEXT_CPPPATH"].extend(get_numpy_include_dirs())

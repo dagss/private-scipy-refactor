@@ -1,42 +1,6 @@
-from numpy.distutils.from_template \
-    import \
-        process_str
-
 from bento.commands.hooks \
     import \
         pre_build, post_configure
-from yaku.task_manager \
-    import \
-        set_file_hook, get_extension_hook
-from yaku.task \
-    import \
-        Task
-
-def hook(ctx, node):
-    return f_src_template_task(ctx, node)
-
-def f_src_template_task(self, node):
-    out = node.change_ext("")
-    target = node.parent.declare(out.name)
-    task = Task("numpy_f_template", inputs=[node], outputs=[target])
-    task.gen = self
-    task.env_vars = []
-    task.env = self.env
-
-    def yo(t):
-        cnt = t.inputs[0].read()
-        print "F TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
-        t.outputs[0].write(process_str(cnt))
-
-    task.func = yo
-    return [task]
-
-@post_configure
-def myconfigure(ctx):
-    cfg = ctx.yaku_configure_ctx
-    ldir = ctx.local_node.path_from(ctx.top_node)
-
-    set_file_hook(cfg, ldir + "/arpack.pyf.src", hook)
 
 @pre_build
 def mybuild(ctx):
