@@ -2,3 +2,5 @@ Library:
     Extension: fblas
         Sources: fblas.pyf.src,
             fblaswrap.f.src
+    Extension: cblas
+        Sources: cblas.pyf.src

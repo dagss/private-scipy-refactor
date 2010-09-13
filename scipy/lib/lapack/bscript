@@ -36,10 +36,10 @@ def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
     ldir = ctx.local_node.path_from(ctx.top_node)
 
-    if cfg.env.has_key("CBLAS"):
-        set_file_hook(cfg, ldir + "/cblas.pyf.src", ftemplate_hook)
+    if cfg.env.has_key("CLAPACK"):
+        set_file_hook(cfg, ldir + "/clapack.pyf.src", ftemplate_hook)
     else:
-        set_file_hook(cfg, ldir + "/cblas.pyf.src", fake_ftemplate_hook)
+        set_file_hook(cfg, ldir + "/clapack.pyf.src", fake_ftemplate_hook)
 
 def fake_ftemplate_hook(self, node):
     out = node.change_ext("")
@@ -97,24 +97,10 @@ def mybuild(ctx):
             return tasks
         finally:
             set_extension_hook(".src", old_hook)
-    ctx.register_builder("fblas", builder)
+    ctx.register_builder("flapack", builder)
 
-#@pre_build
-#def myprebuild(ctx):
-#    bld = ctx.yaku_build_ctx
-#
-#    env = {}
-#    for flag in bld.env["BLAS"]:
-#        env["PYEXT_%s" % flag] = bld.env["LAPACK"][flag]
-#    env["PYEXT_SHLINKFLAGS"] = bld.env["FC_RUNTIME_LDFLAGS"]
-#
-#    for name in ctx.local_pkg.extensions:
-#        ctx.register_environment(name, env)
-#
-#    f2py = bld.builders["f2py_tool"]
-#    def builder(bld, extension, verbose):
-#        return f2py.extension_fsources(extension.name,
-#                extension.sources, env)
-#    ctx.register_builder("calc_lwork", builder)
-#    ctx.register_builder("_flinalg", builder)
-#
+    f2py = bld.builders["f2py_tool"]
+    def builder(bld, extension, verbose):
+        return f2py.extension_fsources(extension.name,
+                extension.sources, env)
+    ctx.register_builder("calc_lwork", builder)
