@@ -1,6 +1,6 @@
 Subento:
     dsolve,
-    eigen/arpack,
+    eigen,
     isolve
 
 Library:

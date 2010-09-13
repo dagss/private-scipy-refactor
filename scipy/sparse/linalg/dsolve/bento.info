@@ -7,3 +7,4 @@ Library:
             _superlu_utils.c,
             _superluobject.c,
             _superlumodule.c
+    Packages: umfpack
