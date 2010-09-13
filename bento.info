@@ -51,9 +51,17 @@ DataFiles: tests
     SourceDir: scipy
     Files:
         fftpack/tests/*.py,
+        fftpack/tests/*.npz,
         integrate/tests/*.py,
         linalg/tests/*.py,
         optimize/tests/*.py,
+        sparse/linalg/eigen/arpack/tests/*.py,
+        sparse/linalg/eigen/lobpcg/tests/*.py,
+        sparse/linalg/isolve/tests/*.py,
+        sparse/linalg/tests/*.py,
+        sparse/linalg/dsolve/umfpack/tests/*.py,
+        sparse/linalg/dsolve/tests/*.py,
+        sparse/tests/*.py,
         special/tests/*.py,
         special/tests/data/boost.npz,
         stats/tests/*.py
@@ -67,5 +75,6 @@ Library:
         scipy.linalg,
         scipy.misc,
         scipy.optimize,
+        scipy.sparse,
         scipy.special,
         scipy.stats

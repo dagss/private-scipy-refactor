@@ -55,6 +55,7 @@ def check_archs(cfg):
           "scipy/optimize/bscript", "scipy/integrate/bscript",
           "scipy/sparse/linalg/dsolve/bscript",
           "scipy/sparse/linalg/eigen/arpack/bscript",
+          "scipy/sparse/linalg/isolve/bscript",
           ])
 @post_configure
 def myconfigure(ctx):
