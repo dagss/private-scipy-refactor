@@ -6,7 +6,6 @@ from bento.commands.hooks \
 
 @pre_build
 def mybuild(ctx):
-    print ctx.local_node.path_from(ctx.top_node)
     env = {"PYEXT_LIBDIR": [ ctx.local_node.path_from(ctx.top_node)],
            "PYEXT_LIBS": ['dfftpack', 'fftpack'],
            "PYEXT_CPPPATH": [
