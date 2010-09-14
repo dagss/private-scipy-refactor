@@ -40,6 +40,7 @@ HookFile: bscript
 Subento:
     scipy/fftpack,
     scipy/integrate,
+    scipy/interpolate,
     scipy/lib,
     scipy/linalg,
     scipy/optimize,
@@ -54,6 +55,7 @@ DataFiles: tests
         fftpack/tests/*.py,
         fftpack/tests/*.npz,
         integrate/tests/*.py,
+        interpolate/tests/*.py,
         linalg/tests/*.py,
         optimize/tests/*.py,
         sparse/linalg/eigen/arpack/tests/*.py,

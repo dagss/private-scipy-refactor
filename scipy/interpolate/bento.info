@@ -1,0 +1,9 @@
+Library:
+    CompiledLibrary: fitpack
+        Sources: fitpack/*.f
+    Extension: _fitpack
+        Sources: src/_fitpackmodule.c
+    Extension: dfitpack
+        Sources: src/fitpack.pyf
+    Extension: _interpolate
+        Sources: src/_interpolate.cpp

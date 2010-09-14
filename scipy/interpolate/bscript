@@ -1,0 +1,24 @@
+from bento.commands.hooks \
+    import \
+        pre_build, post_configure
+from yaku.task_manager \
+    import \
+        set_file_hook
+
+@post_configure
+def myconfigure(ctx):
+    cfg = ctx.yaku_configure_ctx
+    ldir = ctx.local_node.path_from(ctx.top_node)
+    cxx = __import__("cxxtasks")
+    #set_file_hook(cfg, ldir + "/src/_interpolate.cpp",
+    #              cxx.cxx_hook)
+
+@pre_build
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:],
+           "PYEXT_LIBDIR": [ctx.local_node.path_from(ctx.top_node)],
+           "PYEXT_LIBS": ["fitpack"]}
+    ctx.register_environment("_fitpack", env)
+    ctx.register_environment("dfitpack", env)
