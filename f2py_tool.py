@@ -5,6 +5,10 @@ import re
 import shutil
 import subprocess
 
+from cStringIO \
+    import \
+        StringIO
+
 from yaku.task_manager \
     import \
         extension, get_extension_hook, set_extension_hook
@@ -219,3 +223,36 @@ def create_extension_fsources(f2py_builder, name, sources, env):
 
 def get_builder(ctx):
     return F2pyBuilder(ctx)
+
+# This is a set of hacks to deal with scipy idiosyncraties
+def fake_ftemplate_hook(self, node):
+    out = node.change_ext("")
+    target = node.parent.declare(out.name)
+    task = Task("fake_ftemplate_hook", inputs=[node], outputs=[target])
+    task.gen = self
+    task.env_vars = []
+    task.env = self.env
+
+    def execute(t):
+        cnt = t.inputs[0].read()
+        print "FAKE F TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
+        cnt = generate_fake_interface(target.change_ext("").name)
+        t.outputs[0].write(cnt)
+
+    task.func = execute
+    return [task]
+
+def generate_fake_interface(name):
+    """Generate a (fake) .pyf."""
+    f = StringIO()
+    try:
+        f.write('python module ' +name+'\n')
+        f.write('usercode void empty_module(void) {}\n')
+        f.write('interface\n')
+        f.write('subroutine empty_module()\n')
+        f.write('intent(c) empty_module\n')
+        f.write('end subroutine empty_module\n')
+        f.write('end interface\nend python module'+name+'\n')
+        return f.getvalue()
+    finally:
+        f.close()

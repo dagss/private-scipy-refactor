@@ -1,103 +1,30 @@
-from cStringIO \
-    import \
-        StringIO
-
-from numpy.distutils.from_template \
-    import \
-        process_str
-
 from bento.commands.hooks \
     import \
         post_configure, pre_build
 from yaku.task_manager \
     import \
         set_file_hook, get_extension_hook, set_extension_hook
-from yaku.task \
-    import \
-        Task
-
-def generate_fake_interface(name):
-    """Generate a (fake) .pyf file from another pyf file (!)."""
-    f = StringIO()
-    try:
-        f.write('python module ' +name+'\n')
-        f.write('usercode void empty_module(void) {}\n')
-        f.write('interface\n')
-        f.write('subroutine empty_module()\n')
-        f.write('intent(c) empty_module\n')
-        f.write('end subroutine empty_module\n')
-        f.write('end interface\nend python module'+name+'\n')
-        return f.getvalue()
-    finally:
-        f.close()
 
 @post_configure
 def myconfigure(ctx):
+    f2py_tool = __import__("f2py_tool")
     cfg = ctx.yaku_configure_ctx
     ldir = ctx.local_node.path_from(ctx.top_node)
 
-    if cfg.env.has_key("CLAPACK"):
-        set_file_hook(cfg, ldir + "/clapack.pyf.src", ftemplate_hook)
-    else:
-        set_file_hook(cfg, ldir + "/clapack.pyf.src", fake_ftemplate_hook)
-
-def fake_ftemplate_hook(self, node):
-    out = node.change_ext("")
-    target = node.parent.declare(out.name)
-    task = Task("fake_ftemplate_hook", inputs=[node], outputs=[target])
-    task.gen = self
-    task.env_vars = []
-    task.env = self.env
-
-    def yo(t):
-        cnt = t.inputs[0].read()
-        print "F TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
-        cnt = generate_fake_interface(target.change_ext("").name)
-        t.outputs[0].write(cnt)
-
-    task.func = yo
-    return [task]
-
-def ftemplate_hook(ctx, node):
-    return f_src_template_task(ctx, node)
-
-def f_src_template_task(self, node):
-    out = node.change_ext("")
-    target = node.parent.declare(out.name)
-    task = Task("numpy_f_template", inputs=[node], outputs=[target])
-    task.gen = self
-    task.env_vars = []
-    task.env = self.env
-
-    def yo(t):
-        cnt = t.inputs[0].read()
-        print "F TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
-        t.outputs[0].write(process_str(cnt))
-
-    task.func = yo
-    return [task]
+    if not cfg.env.has_key("CLAPACK"):
+        set_file_hook(cfg, ldir + "/clapack.pyf.src",
+                      f2py_tool.fake_ftemplate_hook)
 
 @pre_build
 def mybuild(ctx):
     bld = ctx.yaku_build_ctx
-    ldir = ctx.local_node.path_from(ctx.top_node)
 
     env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:]}
     for flag in bld.env["BLAS"]:
         var = env.get("PYEXT_%s" % flag, [])
         var.extend(bld.env["LAPACK"][flag][:])
         env["PYEXT_%s" % flag] = var
-
-    def builder(bld, extension, verbose):
-        builder = bld.builders["pyext"].extension
-        old_hook = get_extension_hook(".src")
-        try:
-            set_extension_hook(".src", ftemplate_hook)
-            tasks = builder(extension.name, extension.sources, env)
-            return tasks
-        finally:
-            set_extension_hook(".src", old_hook)
-    ctx.register_builder("flapack", builder)
+    ctx.register_builder("flapack", env)
 
     f2py = bld.builders["f2py_tool"]
     def builder(bld, extension, verbose):
