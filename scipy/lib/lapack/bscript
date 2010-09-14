@@ -24,7 +24,7 @@ def mybuild(ctx):
         var = env.get("PYEXT_%s" % flag, [])
         var.extend(bld.env["LAPACK"][flag][:])
         env["PYEXT_%s" % flag] = var
-    ctx.register_builder("flapack", env)
+    ctx.register_environment("flapack", env)
 
     f2py = bld.builders["f2py_tool"]
     def builder(bld, extension, verbose):
