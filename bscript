@@ -79,9 +79,9 @@ def myconfigure(ctx):
             cfg.env["CFLAGS"].extend(["-arch", arch])
             cfg.env["LINKFLAGS"].extend(["-arch", arch])
     else:
-        cfg.env["BLAS"] = {"LIBDIR": ["/usr/lib/atlas"], "LIBS": ["blas"]}
-        cfg.env["LAPACK"] = {"LIBDIR": ["/usr/lib/atlas"], "LIBS": ["lapack", "blas"]}
-
+        cfg.env["BLAS"] = {"LIBS": ["f77blas", "cblas", "atlas"]}
+        cfg.env["LAPACK"] = {"LIBS": ["lapack", "f77blas",
+                                      "cblas", "atlas"]}
 
     cfg.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
                              "VERSION": "'0.8.0'",
