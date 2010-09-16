@@ -38,6 +38,7 @@ Classifiers:
 HookFile: bscript
 
 Subento:
+    scipy/cluster,
     scipy/fftpack,
     scipy/integrate,
     scipy/interpolate,
@@ -47,6 +48,7 @@ Subento:
     scipy/optimize,
     scipy/signal,
     scipy/sparse,
+    scipy/spatial,
     scipy/special,
     scipy/stats
 
@@ -54,6 +56,8 @@ DataFiles: tests
     TargetDir: $sitedir/scipy
     SourceDir: scipy
     Files:
+        cluster/tests/*.py,
+        cluster/tests/*.txt,
         fftpack/tests/*.py,
         fftpack/tests/*.npz,
         integrate/tests/*.py,
@@ -71,13 +75,15 @@ DataFiles: tests
         linalg/tests/*.py,
         optimize/tests/*.py,
         signal/tests/*.py,
-        sparse/linalg/eigen/arpack/tests/*.py,
+        spatial/tests/*.py,
         sparse/linalg/eigen/lobpcg/tests/*.py,
         sparse/linalg/isolve/tests/*.py,
         sparse/linalg/tests/*.py,
         sparse/linalg/dsolve/umfpack/tests/*.py,
         sparse/linalg/dsolve/tests/*.py,
         sparse/tests/*.py,
+        spatial/tests/*.py,
+        spatial/tests/*.txt,
         special/tests/*.py,
         special/tests/data/boost.npz,
         stats/tests/*.py
@@ -85,6 +91,7 @@ DataFiles: tests
 Library:
     Packages:
         scipy,
+        scipy.cluster,
         scipy.constants,
         scipy.fftpack,
         scipy.io,
@@ -95,6 +102,7 @@ Library:
         scipy.misc,
         scipy.optimize,
         scipy.signal,
+        scipy.spatial,
         scipy.sparse,
         scipy.special,
         scipy.stats
