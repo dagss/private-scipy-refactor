@@ -3,10 +3,10 @@ import sys
 
 from numpy.distutils.conv_template \
     import \
-        process_str as process_c_str
+        process_file as process_c_file
 from numpy.distutils.from_template \
     import \
-        process_str as process_f_str
+        process_file as process_f_file
 
 from yaku.task_manager \
     import \
@@ -42,9 +42,9 @@ def c_src_template_task(self, node):
     task.env = self.env
 
     def execute(t):
-        cnt = t.inputs[0].read()
         print "C TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
-        t.outputs[0].write(process_c_str(cnt))
+        cnt = process_c_file(t.inputs[0].abspath())
+        t.outputs[0].write(cnt)
 
     task.func = execute
     return [task]
@@ -59,9 +59,9 @@ def f_src_template_task(self, node):
     task.env = self.env
 
     def execute(t):
-        cnt = t.inputs[0].read()
         print "F TEMPLATE: %s -> %s" % (t.inputs[0], t.outputs[0])
-        t.outputs[0].write(process_f_str(cnt))
+        cnt = process_f_file(t.inputs[0].abspath())
+        t.outputs[0].write(cnt)
 
     task.func = execute
     return [task]
