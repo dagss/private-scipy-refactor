@@ -5,13 +5,16 @@ from yaku.task_manager \
     import \
         set_file_hook
 
+def fatima(self, node):
+    pyext = __import__("pyext")
+    return pyext.pycxx_hook(self, node)
+
 @post_configure
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
     ldir = ctx.local_node.path_from(ctx.top_node)
-    cxx = __import__("cxxtasks")
-    #set_file_hook(cfg, ldir + "/src/_interpolate.cpp",
-    #              cxx.cxx_hook)
+    set_file_hook(cfg, ldir + "/src/_interpolate.cpp",
+                  fatima)
 
 @pre_build
 def mybuild(ctx):
