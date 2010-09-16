@@ -16,6 +16,7 @@ def mybuild(ctx):
     for flag in bld.env["BLAS"]:
         var = env.get("PYEXT_%s" % flag, [])
         var.extend(copy.deepcopy(bld.env["LAPACK"][flag]))
+        env["PYEXT_%s" % flag] = var
 
     for name in ctx.local_pkg.extensions:
         ctx.register_environment(name, env)
