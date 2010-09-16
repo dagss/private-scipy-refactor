@@ -24,10 +24,13 @@ import yaku.errors
 
 @extension(".src")
 def src_template_hook(self, node):
-    base_ext = node.change_ext("").suffix()
-    if base_ext in [".f", ".pyf"]:
+    output = node.change_ext("")
+    out_ext = output.suffix()
+    if out_ext in [".f", ".pyf"]:
+        self.sources.append(output)
         return f_src_template_task(self, node)
-    elif base_ext in [".c"]:
+    elif out_ext in [".c"]:
+        self.sources.append(output)
         return c_src_template_task(self, node)
     else:
         raise ValueError("Unknown suffix %s" % (base_ext + ".src",))
