@@ -68,15 +68,28 @@ def includes(filename):
     finally:
         fid.close()
 
+def _module_name(node):
+    return os.path.splitext(node.name)[0]
+
+def _module_node(node):
+    """Return the .c module node."""
+    return node.parent.declare("%smodule.c" % _module_name(node))
+
 @extension(".pyf")
 def f2py_hook(self, node):
+    # FIXME: refactor redundancies between f2py_hook and f2py_task
+    modname = _module_name(node)
+    cmodule = _module_node(node)
+    fwrap = node.parent.declare(FWRAP_TEMPLATE % modname)
+    fobject = self.bld.bld_root.declare("f2py/fortranobject.c")
+    self.sources.extend([cmodule, fwrap, fobject])
     return f2py_task(self, node)
 
 def f2py_task(self, node):
     fobject = self.bld.bld_root.declare("f2py/fortranobject.c")
     if node.suffix() == ".pyf":
-        modname = os.path.splitext(node.name)[0]
-        target = node.parent.declare(modname + "module.c")
+        modname = _module_name(node)
+        target = _module_node(node)
         fwrap = node.parent.declare(FWRAP_TEMPLATE % modname)
         # HACK: we write an empty file to force the file to exist if
         # f2py does not generate it (automatically detecting cases
@@ -226,6 +239,11 @@ def get_builder(ctx):
 
 # This is a set of hacks to deal with scipy idiosyncraties
 def fake_ftemplate_hook(self, node):
+    output = node.change_ext("")
+    self.sources.append(output)
+    return fake_ftemplate_task(self, node)
+
+def fake_ftemplate_task(self, node):
     out = node.change_ext("")
     target = node.parent.declare(out.name)
     task = Task("fake_ftemplate_hook", inputs=[node], outputs=[target])
