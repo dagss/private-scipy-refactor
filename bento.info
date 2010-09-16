@@ -46,6 +46,7 @@ Subento:
     scipy/optimize,
     scipy/sparse,
     scipy/special,
+    scipy/signal,
     scipy/stats
 
 DataFiles: tests
@@ -56,8 +57,11 @@ DataFiles: tests
         fftpack/tests/*.npz,
         integrate/tests/*.py,
         interpolate/tests/*.py,
+        lib/blas/tests/*.py,
+        lib/lapack/tests/*.py,
         linalg/tests/*.py,
         optimize/tests/*.py,
+        signal/tests/*.py,
         sparse/linalg/eigen/arpack/tests/*.py,
         sparse/linalg/eigen/lobpcg/tests/*.py,
         sparse/linalg/isolve/tests/*.py,
@@ -75,10 +79,12 @@ Library:
         scipy.constants,
         scipy.fftpack,
         scipy.integrate,
+        scipy.interpolate,
         scipy.lib,
         scipy.linalg,
         scipy.misc,
         scipy.optimize,
+        scipy.signal,
         scipy.sparse,
         scipy.special,
         scipy.stats
