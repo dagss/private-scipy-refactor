@@ -76,6 +76,7 @@ DataFiles: tests
         optimize/tests/*.py,
         signal/tests/*.py,
         spatial/tests/*.py,
+        sparse/linalg/eigen/arpack/tests/*.py,
         sparse/linalg/eigen/lobpcg/tests/*.py,
         sparse/linalg/isolve/tests/*.py,
         sparse/linalg/tests/*.py,
