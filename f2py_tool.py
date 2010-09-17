@@ -163,7 +163,7 @@ def f2py_func(task, extra_cmd=None):
           extra_cmd
     f2py_cmd = [sys.executable, '-c',
                 "\"from numpy.f2py.f2py2e import run_main;" \
-                "run_main(%s, True)\"" % repr(cmd)]
+                "run_main(%s)\"" % repr(cmd)]
     if task.env["VERBOSE"]:
         print "F2PY: %s" % " ".join(f2py_cmd)
     else:
