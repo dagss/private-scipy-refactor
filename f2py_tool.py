@@ -21,6 +21,9 @@ from yaku.compiled_fun \
 from yaku.utils \
     import \
         ensure_dir, find_program
+from yaku.pprint \
+    import \
+        pprint
 import yaku.errors
 
 # Those regex are copied from build_src in numpy.distutils.command
@@ -164,7 +167,8 @@ def f2py_func(task, extra_cmd=None):
     if task.env["VERBOSE"]:
         print "F2PY: %s" % " ".join(f2py_cmd)
     else:
-        print "F2PY         %s" % " ".join([str(i) for i in task.inputs])
+        pprint('GREEN', "%-16s%s"% (task.name, " ".join([i.bldpath() for i in task.inputs])))
+
     p = subprocess.Popen(" ".join(f2py_cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=task.env["BLDDIR"])
     for line in p.stdout.readlines():
         print line.strip()
