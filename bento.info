@@ -35,7 +35,21 @@ Classifiers:
     Operating System :: Unix,
     Operating System :: MacOS
 
-HookFile: bscript
+HookFile:
+    bscript,
+    scipy/fftpack/bscript,
+    scipy/interpolate/bscript,
+    scipy/integrate/bscript,
+    scipy/lib/blas/bscript,
+    scipy/lib/lapack/bscript,
+    scipy/linalg/bscript,
+    scipy/optimize/bscript,
+    scipy/sparse/linalg/dsolve/bscript,
+    scipy/sparse/linalg/eigen/arpack/bscript,
+    scipy/sparse/linalg/isolve/bscript,
+    scipy/signal/bscript,
+    scipy/special/bscript,
+    scipy/stats/bscript
 
 Subento:
     scipy/cluster,

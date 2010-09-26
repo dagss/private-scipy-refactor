@@ -10,7 +10,7 @@ except ImportError:
 from numpy.distutils.misc_util import get_numpy_include_dirs
 from bento.commands.hooks \
     import \
-        post_configure, recurse, pre_build, post_build
+        post_configure, pre_build, post_build
 from bento.installed_package_description \
     import \
         InstalledSection
@@ -50,21 +50,6 @@ def check_archs(cfg):
 
     return archs.keys()
 
-@recurse([
-          "scipy/fftpack/bscript",
-          "scipy/interpolate/bscript",
-          "scipy/integrate/bscript",
-          "scipy/lib/blas/bscript",
-          "scipy/lib/lapack/bscript",
-          "scipy/linalg/bscript",
-          "scipy/optimize/bscript",
-          "scipy/sparse/linalg/dsolve/bscript",
-          "scipy/sparse/linalg/eigen/arpack/bscript",
-          "scipy/sparse/linalg/isolve/bscript",
-          "scipy/signal/bscript",
-          "scipy/special/bscript",
-          "scipy/stats/bscript",
-          ])
 @post_configure
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
