@@ -1,6 +1,9 @@
 import os
 import sys
 import copy
+import subprocess
+import re
+import shutil
 
 try:
     import numpy
@@ -50,6 +53,18 @@ def check_archs(cfg):
 
     return archs.keys()
 
+def check_gcc_version(cfg):
+    GCC_VERSION = re.compile("^gcc version (\d).(\d).(\d)")
+    try:
+        p = subprocess.Popen(cfg.env["PYEXT_CC"] + ["-v"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        p.wait()
+        for line in p.stdout.readlines():
+            m = GCC_VERSION.match(line)
+            if m:
+                return [int(i) for i in m.groups()]
+    except OSError:
+        return None
+
 @post_configure
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
@@ -68,7 +83,21 @@ def myconfigure(ctx):
         for arch in ["i386"]:
             cfg.env["F77FLAGS"].extend(["-arch", arch])
             cfg.env["CFLAGS"].extend(["-arch", arch])
+            cfg.env["PYEXT_CFLAGS"].extend(["-arch", arch])
+            cfg.env["PYEXT_SHLINKFLAGS"].extend(["-arch", arch])
             cfg.env["LINKFLAGS"].extend(["-arch", arch])
+
+        # XXX: hack to work around gcc 4.0 vs 4.2 mismatch. This will hopefully
+        # all go away once we don't rely on distutils at all for obtaining flags
+        ret = check_gcc_version(cfg)
+        if ret is not None:
+            macro, minor, micro = ret
+            if macro == 4 and minor == 0:
+                cfg.env["CC"] = cfg.env["PYEXT_CC"][:]
+                cfg.env["CXX"] = ["g++-4.0"]
+                cfg.env["PYEXT_CXX"] = ["g++-4.0"]
+                cfg.env["PYEXT_SHLINK"] = ["gcc-4.0"]
+                cfg.env["PYEXT_CXXSHLINK"] = ["g++-4.0", "-shared"]
     else:
         cfg.env["BLAS"] = {"LIBS": ["f77blas", "cblas", "atlas"]}
         cfg.env["LAPACK"] = {"LIBS": ["lapack", "f77blas",
