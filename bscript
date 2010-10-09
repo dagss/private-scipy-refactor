@@ -83,7 +83,7 @@ def myconfigure(ctx):
     check_fortran_runtime_flags(cfg)
 
 @pre_build
-def mybuild(ctx):
+def prebuild(ctx):
     bld = ctx.yaku_build_ctx
     if "-v" in sys.argv:
         bld.env["VERBOSE"] = False
@@ -105,3 +105,13 @@ def mybuild(ctx):
                   [os.path.join("scipy", "version.py"),
                    os.path.join("scipy", "__config__.py")])
     section_writer.sections["pythonfiles"]["gen_files"] = section
+
+@post_build
+def postbuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    if "-i" in sys.argv:
+        for f in [os.path.join("scipy", "version.py"),
+                  os.path.join("scipy", "__config__.py")]:
+            source = bld.bld_root.find_node(f)
+            shutil.copy(source.path_from(bld.src_root), f)
