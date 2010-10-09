@@ -3,7 +3,6 @@ Library:
         Sources:
             ARPACK/SRC/*.f,
             ARPACK/UTIL/*.f,
-            ARPACK/FWRAPPERS/dummy.f,
             ARPACK/LAPACK/clahqr.f,
             ARPACK/LAPACK/dlahqr.f,
             ARPACK/LAPACK/slahqr.f,
