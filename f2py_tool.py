@@ -14,7 +14,7 @@ from yaku.task_manager \
         extension, get_extension_hook, set_extension_hook
 from yaku.task \
     import \
-        Task
+        task_factory
 from yaku.compiled_fun \
     import \
         compile_fun
@@ -102,7 +102,7 @@ def f2py_task(self, node):
 
         ensure_dir(target.name)
         
-        task = Task("f2py", inputs=[node],
+        task = task_factory("f2py")(inputs=[node],
                     outputs=[target, fwrap, fobject])
         task.env = self.env
         task.env_vars = ["F2PYFLAGS"]
@@ -131,7 +131,7 @@ def f2py_hook_fsources(self, modname, nodes):
 
     ensure_dir(target.name)
     
-    task = Task("f2py", inputs=nodes, outputs=[target, fwrap, fobject])
+    task = task_factory("f2py")(inputs=nodes, outputs=[target, fwrap, fobject])
     task.env = self.env
     task.env_vars = ["F2PYFLAGS"]
 
@@ -167,7 +167,7 @@ def f2py_func(task, extra_cmd=None):
     if task.env["VERBOSE"]:
         print "F2PY: %s" % " ".join(f2py_cmd)
     else:
-        pprint('GREEN', "%-16s%s"% (task.name, " ".join([i.bldpath() for i in task.inputs])))
+        pprint('GREEN', "%-16s%s"% (task.name.upper(), " ".join([i.bldpath() for i in task.inputs])))
 
     p = subprocess.Popen(" ".join(f2py_cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=task.env["BLDDIR"])
     for line in p.stdout.readlines():
@@ -175,32 +175,14 @@ def f2py_func(task, extra_cmd=None):
     p.wait()
     assert p.returncode == 0
 
-def configure(ctx):
-    import numpy.f2py
-
-    f2py_dir = ctx.bld_root.declare("f2py")
-
-    d = os.path.dirname(numpy.f2py.__file__)
-    source = os.path.join(d, 'src', "fortranobject.c")
-    target = os.path.join(f2py_dir.abspath(), "fortranobject.c")
-    ensure_dir(target)
-    shutil.copy(source, target)
-
-    source = os.path.join(d, 'src', "fortranobject.h")
-    target = os.path.join(f2py_dir.abspath(), "fortranobject.h")
-    shutil.copy(source, target)
-
-    ctx.env["PYEXT_CPPPATH"].append(f2py_dir.get_bld().abspath())
-    ctx.env["F2PYFLAGS"] = []
-
 from yaku.tools.ctasks import _merge_env
-class F2pyBuilder(object):
+from yaku.tools import Builder
+class F2pyBuilder(Builder):
     def clone(self):
         return F2pyBuilder(self.ctx)
 
     def __init__(self, ctx):
-        self.ctx = ctx
-        self.env = copy.deepcopy(ctx.env)
+        Builder.__init__(self, ctx)
 
         # FIXME: make tools modules available from yaku build context
         self.pyext = __import__("pyext")
@@ -209,6 +191,27 @@ class F2pyBuilder(object):
     def extension_fsources(self, name, sources, env=None):
         env = _merge_env(self.env, env)
         return create_extension_fsources(self, name, sources, env)
+
+    def configure(self):
+        ctx = self.ctx
+        import numpy.f2py
+
+        f2py_dir = ctx.bld_root.declare("f2py")
+
+        d = os.path.dirname(numpy.f2py.__file__)
+        source = os.path.join(d, 'src', "fortranobject.c")
+        target = os.path.join(f2py_dir.abspath(), "fortranobject.c")
+        ensure_dir(target)
+        shutil.copy(source, target)
+
+        source = os.path.join(d, 'src', "fortranobject.h")
+        target = os.path.join(f2py_dir.abspath(), "fortranobject.h")
+        shutil.copy(source, target)
+
+        ctx.env["PYEXT_CPPPATH"].append(f2py_dir.get_bld().abspath())
+        ctx.env["F2PYFLAGS"] = ["--quiet"]
+
+        self.configured = True
 
 def create_extension_fsources(f2py_builder, name, sources, env):
     """Python extension builder with fortran sources, with f2py hooked
@@ -250,7 +253,7 @@ def fake_ftemplate_hook(self, node):
 def fake_ftemplate_task(self, node):
     out = node.change_ext("")
     target = node.parent.declare(out.name)
-    task = Task("fake_ftemplate_hook", inputs=[node], outputs=[target])
+    task = task_factory("fake_ftemplate_hook")(inputs=[node], outputs=[target])
     task.gen = self
     task.env_vars = []
     task.env = self.env

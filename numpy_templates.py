@@ -1,6 +1,8 @@
 import os
 import sys
 
+import __builtin__ as builtins
+builtins.__NUMPY_SETUP__ = True
 from numpy.distutils.conv_template \
     import \
         process_file as process_c_file
@@ -13,7 +15,7 @@ from yaku.task_manager \
         extension, get_extension_hook
 from yaku.task \
     import \
-        Task
+        task_factory
 from yaku.compiled_fun \
     import \
         compile_fun
@@ -39,7 +41,7 @@ def c_src_template_task(self, node):
     out = node.change_ext("")
     target = node.parent.declare(out.name)
     ensure_dir(target.name)
-    task = Task("numpy_c_template", inputs=[node], outputs=[target])
+    task = task_factory("numpy_c_template")(inputs=[node], outputs=[target])
     task.gen = self
     task.env_vars = []
     task.env = self.env
@@ -56,7 +58,7 @@ def f_src_template_task(self, node):
     out = node.change_ext("")
     target = node.parent.declare(out.name)
     ensure_dir(target.name)
-    task = Task("numpy_f_template", inputs=[node], outputs=[target])
+    task = task_factory("numpy_f_template")(inputs=[node], outputs=[target])
     task.gen = self
     task.env_vars = []
     task.env = self.env
