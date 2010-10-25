@@ -3,7 +3,7 @@ from distutils import sysconfig
 
 from numpy.distutils.misc_util \
     import \
-        get_pkg_info
+        get_pkg_info, get_info
 
 from bento.commands.hooks \
     import \
@@ -11,23 +11,19 @@ from bento.commands.hooks \
 
 @pre_build
 def mybuild(ctx):
-    math_info = get_pkg_info("npymath")
-    # FIXME: This will break as soon as there are spaces in libraries
-    # names or paths (no quote handling). Having this feature in yaku
-    # wuold be useful, to handle pkg-config.
-    npymath_linkflags = math_info.libs().split()
-    npymath_cflags = math_info.cflags().split()
+    math_info = get_info("npymath")
 
-    clib_env = {"CPPPATH": [sysconfig.get_python_inc()],
-                "CFLAGS": npymath_cflags}
+    clib_env = {"CPPPATH": [sysconfig.get_python_inc()] + math_info["include_dirs"],
+                "PYEXT_LIBDIR": math_info["library_dirs"],
+                "PYEXT_LIBS": math_info["libraries"]}
     for name in ctx.local_pkg.compiled_libraries:
         ctx.register_clib_environment(name, clib_env)
 
-    pyext_env = {"CPPPATH": [sysconfig.get_python_inc()],
-                 "CFLAGS": npymath_cflags,
-                 "PYEXT_SHLINKFLAGS": npymath_linkflags}
-    pyext_env["PYEXT_SHLINKFLAGS"].extend(
-            ctx.yaku_build_ctx.env["FC_RUNTIME_LDFLAGS"])
+    pyext_env = {"CPPPATH": [sysconfig.get_python_inc()] + math_info["include_dirs"],
+                 "PYEXT_LIBDIR": math_info["library_dirs"],
+                 "PYEXT_LIBS": math_info["libraries"]}
+    pyext_env["PYEXT_SHLINKFLAGS"] = \
+            ctx.yaku_build_ctx.env["FC_RUNTIME_LDFLAGS"]
     ctx.register_environment("orthogonal_eval", pyext_env)
     ctx.register_environment("lambertw", pyext_env)
 
