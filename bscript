@@ -13,7 +13,7 @@ except ImportError:
 from numpy.distutils.misc_util import get_numpy_include_dirs
 from bento.commands.hooks \
     import \
-        post_configure, pre_build, post_build
+        post_configure, pre_build, post_build, pre_configure
 from bento.installed_package_description \
     import \
         InstalledSection
@@ -22,7 +22,7 @@ from yaku.conftests.conftests \
         check_compiler
 from yaku.conftests.fconftests \
     import \
-        check_fortran_verbose_flag, check_fortran_runtime_flags, check_fcompiler
+        check_fortran_verbose_flag, check_fortran_runtime_flags, check_fcompiler, check_fortran_mangling, check_fortran_dummy_main
 
 def check_archs(cfg):
     archs = {"i386": False, "x86_64": False, "ppc": False, "ppc64": False}
@@ -69,8 +69,13 @@ def check_gcc_version(cfg):
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
 
-    cfg.use_tools(["ctasks", "pyext", "fortran", "tpl_tasks"])
-    cfg.use_tools(["cxxtasks"])
+    cfg.use_tools(["ctasks", "cxxtasks", "tpl_tasks"])
+    cfg.load_tool("fortran")
+    if sys.platform == "win32":
+        cfg.builders["fortran"].configure(candidates=["ifort"])
+    else:
+        cfg.use_tools(["fortran"])
+    cfg.use_tools(["pyext"])
     cfg.use_tools(["numpy_templates"], ["."])
     cfg.use_tools(["f2py_tool"], ["."])
 
@@ -98,6 +103,14 @@ def myconfigure(ctx):
                 cfg.env["PYEXT_CXX"] = ["g++-4.0"]
                 cfg.env["PYEXT_SHLINK"] = ["gcc-4.0"]
                 cfg.env["PYEXT_CXXSHLINK"] = ["g++-4.0", "-shared"]
+    elif sys.platform == "win32":
+        for flag in ["CFLAGS", "PYEXT_CFLAGS"]:
+            cfg.env[flag] = ["/MD", "/Od", "/GS-", "/DNDEBUG", "/nologo"]
+        cfg.env["PYEXT_CXXFLAGS"] = ["/TP", "/MD", "/EHsc", "/Od", "/DNDEBUG", "/nologo"]
+        cfg.env.extend("F77FLAGS", ["/MD", "/Od"])
+        cfg.env["BLAS"] = {"LIBDIR": [r"C:\Program Files (x86)\Intel\Compiler\11.1\038\lib\intel64", r"C:\Program Files (x86)\Intel\Compiler\11.1\038\mkl\em64t\lib"],
+		"LIBS": ["mkl_lapack95_lp64", "mkl_blas95_lp64", "mkl_intel_lp64", "mkl_intel_thread", "mkl_core", "libiomp5md"]}
+        cfg.env["LAPACK"] = cfg.env["BLAS"]
     else:
         cfg.env["BLAS"] = {"LIBS": ["f77blas", "cblas", "atlas"]}
         cfg.env["LAPACK"] = {"LIBS": ["lapack", "f77blas",
@@ -106,10 +119,25 @@ def myconfigure(ctx):
     cfg.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
                              "VERSION": "'0.8.0'",
                              "RELEASE": "False"}
-    for f in ["CFLAGS", "PYEXT_CFLAGS", "PYEXT_CXXFLAGS", "CXXFLAGS", "F77FLAGS"]:
-        cfg.env[f].append("-fPIC")
+    #for f in ["CFLAGS", "PYEXT_CFLAGS", "PYEXT_CXXFLAGS", "CXXFLAGS", "F77FLAGS"]:
+    #    cfg.env[f].append("-fPIC")
     check_fortran_verbose_flag(cfg)
     check_fortran_runtime_flags(cfg)
+    check_fortran_dummy_main(cfg)
+    check_fortran_mangling(cfg)
+    u, du, case = cfg.env["FC_MANGLING"]
+
+    if u == "":
+        cfg.env["CFLAGS"].append("/DF77_NO_APPEND_FORTRAN")
+        cfg.env["CFLAGS"].append("/DNO_APPEND_FORTRAN")
+        cfg.env["PYEXT_CFLAGS"].append("/DF77_NO_APPEND_FORTRAN")
+        cfg.env["PYEXT_CFLAGS"].append("/DNO_APPEND_FORTRAN")
+    if case == 'upper':
+        cfg.env["CFLAGS"].append('/DF77_UPPERCASE_FORTRAN')
+        cfg.env["CFLAGS"].append('/DUPPERCASE_FORTRAN')
+        cfg.env["PYEXT_CFLAGS"].append('/DF77_UPPERCASE_FORTRAN')
+        cfg.env["PYEXT_CFLAGS"].append('/DUPPERCASE_FORTRAN')
+    cfg.env["PYEXT_LIBDIR"].extend(cfg.env["LIBDIR"])
 
 @pre_build
 def prebuild(ctx):
