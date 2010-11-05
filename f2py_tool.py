@@ -25,6 +25,7 @@ from yaku.pprint \
     import \
         pprint
 import yaku.errors
+import yaku.tools
 
 # Those regex are copied from build_src in numpy.distutils.command
 F2PY_MODNAME_MATCH = re.compile(r'\s*python\s*module\s*(?P<name>[\w_]+)',
@@ -175,7 +176,6 @@ def f2py_func(task, extra_cmd=None):
     p.wait()
     assert p.returncode == 0
 
-from yaku.tools.ctasks import _merge_env
 from yaku.tools import Builder
 class F2pyBuilder(Builder):
     def clone(self):
@@ -189,7 +189,7 @@ class F2pyBuilder(Builder):
         self.pyext_builder = ctx.builders["pyext"].clone()
 
     def extension_fsources(self, name, sources, env=None):
-        env = _merge_env(self.env, env)
+        env = yaku.tools._merge_env(self.env, env)
         return create_extension_fsources(self, name, sources, env)
 
     def configure(self):
