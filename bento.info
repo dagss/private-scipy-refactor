@@ -51,7 +51,7 @@ HookFile:
     scipy/special/bscript,
     scipy/stats/bscript
 
-Subento:
+Recurse:
     scipy/cluster,
     scipy/fftpack,
     scipy/integrate,

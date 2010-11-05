@@ -1,4 +1,4 @@
-Subento: arpack
+Recurse: arpack
 
 Library:
     Packages: arpack, lobpcg
