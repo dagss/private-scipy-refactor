@@ -2,7 +2,7 @@ from bento.commands.hooks \
     import \
         pre_build
 
-@pre_build
+@pre_build()
 def mybuild(ctx):
     bld = ctx.yaku_build_ctx
 

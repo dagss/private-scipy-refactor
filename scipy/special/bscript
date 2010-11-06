@@ -9,7 +9,7 @@ from bento.commands.hooks \
     import \
         pre_build
 
-@pre_build
+@pre_build()
 def mybuild(ctx):
     math_info = get_info("npymath")
 

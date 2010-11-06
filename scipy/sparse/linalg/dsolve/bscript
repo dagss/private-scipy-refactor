@@ -4,7 +4,7 @@ from bento.commands.hooks \
     import \
         pre_build
 
-@pre_build
+@pre_build()
 def mybuild(ctx):
     cpppath = ctx.local_node.find_node("SuperLU").find_node("SRC")
     env = {"CPPPATH": [cpppath.abspath()],

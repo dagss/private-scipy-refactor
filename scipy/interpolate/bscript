@@ -9,14 +9,14 @@ def fatima(self, node):
     pyext = __import__("pyext")
     return pyext.pycxx_hook(self, node)
 
-@post_configure
+@post_configure()
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
     ldir = ctx.local_node.path_from(ctx.top_node)
     set_file_hook(cfg, ldir + "/src/_interpolate.cpp",
                   fatima)
 
-@pre_build
+@pre_build()
 def mybuild(ctx):
     bld = ctx.yaku_build_ctx
 

@@ -2,5 +2,5 @@
 #    import \
 #        pre_build
 #
-#@pre_build
+#@pre_build()
 #def mybuild(ctx):

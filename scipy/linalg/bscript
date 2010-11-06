@@ -50,7 +50,7 @@ def _merge_f2py_hook(self, node, fake=True):
     ret = f2py_hook(self, target)
     return ret
 
-@post_configure
+@post_configure()
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
     ldir = ctx.local_node.path_from(ctx.top_node)
@@ -67,7 +67,7 @@ def myconfigure(ctx):
     else:
         set_file_hook(cfg, ldir + "/generic_clapack.pyf", fake_merge_f2py_hook)
 
-@pre_build
+@pre_build()
 def myprebuild(ctx):
     bld = ctx.yaku_build_ctx
 

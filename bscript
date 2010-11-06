@@ -65,7 +65,7 @@ def check_gcc_version(cfg):
     except OSError:
         return None
 
-@post_configure
+@post_configure()
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
 
@@ -139,7 +139,7 @@ def myconfigure(ctx):
         cfg.env["PYEXT_CFLAGS"].append('/DUPPERCASE_FORTRAN')
     cfg.env["PYEXT_LIBDIR"].extend(cfg.env["LIBDIR"])
 
-@pre_build
+@pre_build()
 def prebuild(ctx):
     bld = ctx.yaku_build_ctx
     if "-v" in sys.argv:
@@ -163,7 +163,7 @@ def prebuild(ctx):
                    os.path.join("scipy", "__config__.py")])
     section_writer.sections["pythonfiles"]["gen_files"] = section
 
-@post_build
+@post_build()
 def postbuild(ctx):
     bld = ctx.yaku_build_ctx
 

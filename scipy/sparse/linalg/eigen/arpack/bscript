@@ -5,7 +5,7 @@ from bento.commands.hooks \
     import \
         pre_build, post_configure
 
-@pre_build
+@pre_build()
 def mybuild(ctx):
     bld = ctx.yaku_build_ctx
     ldir = ctx.local_node.path_from(ctx.top_node)
