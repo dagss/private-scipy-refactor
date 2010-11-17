@@ -21,9 +21,9 @@ Library:
         Sources:
             toms/*.f
     Extension: lambertw
-        Sources: lambertw.c
+        Sources: lambertw.pyx
     Extension: orthogonal_eval
-        Sources: orthogonal_eval.c
+        Sources: orthogonal_eval.pyx
     Extension: _cephes
         Sources:
             _cephesmodule.c,
