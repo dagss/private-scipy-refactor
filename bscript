@@ -119,8 +119,8 @@ def myconfigure(ctx):
     cfg.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
                              "VERSION": "'0.8.0'",
                              "RELEASE": "False"}
-    #for f in ["CFLAGS", "PYEXT_CFLAGS", "PYEXT_CXXFLAGS", "CXXFLAGS", "F77FLAGS"]:
-    #    cfg.env[f].append("-fPIC")
+    for f in ["CFLAGS", "PYEXT_CFLAGS", "PYEXT_CXXFLAGS", "CXXFLAGS", "F77FLAGS"]:
+        cfg.env[f].append("-fPIC")
     check_fortran_verbose_flag(cfg)
     check_fortran_runtime_flags(cfg)
     check_fortran_dummy_main(cfg)
