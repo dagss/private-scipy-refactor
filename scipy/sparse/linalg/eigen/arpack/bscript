@@ -1,0 +1,25 @@
+import os
+import sys
+
+from bento.commands.hooks \
+    import \
+        pre_build, post_configure
+
+@pre_build()
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+    ldir = ctx.local_node.path_from(ctx.top_node)
+
+    sources = ctx.local_pkg.compiled_libraries["arpack"].sources
+    if sys.platform == "darwin":
+        sources.extend([os.path.join("ARPACK", "FWRAPPERS", "veclib_cabi_c.c"),
+                        os.path.join("ARPACK", "FWRAPPERS", "veclib_cabi_f.f")])
+    else:
+        sources.append(os.path.join("ARPACK", "FWRAPPERS", "dummy.f"))
+    env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:],
+           "PYEXT_LIBS": ["arpack"],
+           "PYEXT_LIBDIR": [ldir]}
+    for flag in bld.env["LAPACK"]:
+        var = env.get("PYEXT_%s" % flag, [])
+        var.extend(bld.env["LAPACK"][flag][:])
+    ctx.register_environment("_arpack", env)

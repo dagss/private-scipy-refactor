@@ -1,0 +1,41 @@
+import copy
+from distutils import sysconfig
+
+from numpy.distutils.misc_util \
+    import \
+        get_pkg_info, get_info
+
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build()
+def mybuild(ctx):
+    math_info = get_info("npymath")
+
+    clib_env = {"CPPPATH": [sysconfig.get_python_inc()] + math_info["include_dirs"],
+                "PYEXT_LIBDIR": math_info["library_dirs"],
+                "PYEXT_LIBS": math_info["libraries"]}
+    for name in ctx.local_pkg.compiled_libraries:
+        ctx.register_clib_environment(name, clib_env)
+
+    pyext_env = {"CPPPATH": [sysconfig.get_python_inc()] + math_info["include_dirs"],
+                 "PYEXT_LIBDIR": math_info["library_dirs"],
+                 "PYEXT_LIBS": math_info["libraries"]}
+    pyext_env["PYEXT_SHLINKFLAGS"] = \
+            ctx.yaku_build_ctx.env["FC_RUNTIME_LDFLAGS"]
+    ctx.register_environment("orthogonal_eval", pyext_env)
+    ctx.register_environment("lambertw", pyext_env)
+
+    cephes_env = copy.deepcopy(pyext_env)
+    cephes_env["PYEXT_LIBDIR"] = [
+            ctx.local_node.path_from(ctx.top_node)]
+    cephes_env["PYEXT_LIBS"] = ['sc_amos', 'sc_toms', 'sc_c_misc',
+            'sc_cephes', 'sc_mach', 'sc_cdf', 'sc_specfunlib']
+    ctx.register_environment("_cephes", cephes_env)
+
+    specfun_env = copy.deepcopy(pyext_env)
+    specfun_env["PYEXT_LIBDIR"] = [
+            ctx.local_node.path_from(ctx.top_node)]
+    specfun_env["PYEXT_LIBS"] = ['sc_specfunlib']
+    ctx.register_environment("specfun", specfun_env)

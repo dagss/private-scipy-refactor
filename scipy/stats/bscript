@@ -1,0 +1,22 @@
+import copy
+from distutils import sysconfig
+
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build()
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {"PYEXT_LIBDIR": [ctx.local_node.path_from(ctx.top_node)],
+           "PYEXT_LIBS": ['statlibimp'],
+           "PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"]}
+    ctx.register_environment("statlib", env)
+    ctx.register_environment("mvn", env)
+
+    f2py = bld.builders["f2py_tool"]
+    def builder(bld, extension, verbose):
+        return f2py.extension_fsources(extension.name,
+                extension.sources, env)
+    ctx.register_builder("futil", builder)

@@ -1,0 +1,10 @@
+Recurse:
+    dsolve,
+    eigen,
+    isolve
+
+Library:
+    Packages:
+        dsolve,
+        eigen,
+        isolve
