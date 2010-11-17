@@ -34,4 +34,5 @@ Library:
             ufunc_extras.c
     Extension: specfun
         Sources:
-            specfun.pyf
+            specfun.pyx,
+            specfun_fc.f
