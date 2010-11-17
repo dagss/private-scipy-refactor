@@ -4,6 +4,7 @@ import copy
 import subprocess
 import re
 import shutil
+import glob
 
 try:
     import numpy
@@ -112,8 +113,13 @@ def myconfigure(ctx):
 		"LIBS": ["mkl_lapack95_lp64", "mkl_blas95_lp64", "mkl_intel_lp64", "mkl_intel_thread", "mkl_core", "libiomp5md"]}
         cfg.env["LAPACK"] = cfg.env["BLAS"]
     else:
+        # Very hacky solution for now, to pick up lapack on some Ubuntu systems
+        if glob.glob('/usr/lib/liblapack_pic*'):
+            lapack = 'lapack_pic'
+        else:
+            lapack = 'lapack'
         cfg.env["BLAS"] = {"LIBS": ["f77blas", "cblas", "atlas"]}
-        cfg.env["LAPACK"] = {"LIBS": ["lapack", "f77blas",
+        cfg.env["LAPACK"] = {"LIBS": [lapack, "f77blas",
                                       "cblas", "atlas"]}
 
     cfg.env["SUBST_DICT"] = {"SHORT_VERSION": "'0.8.0'",
