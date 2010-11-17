@@ -70,7 +70,7 @@ def check_gcc_version(cfg):
 def myconfigure(ctx):
     cfg = ctx.yaku_configure_ctx
 
-    cfg.use_tools(["ctasks", "cxxtasks", "tpl_tasks"])
+    cfg.use_tools(["ctasks", "cxxtasks", "tpl_tasks", "cython"])
     cfg.load_tool("fortran")
     if sys.platform == "win32":
         cfg.builders["fortran"].configure(candidates=["ifort"])
