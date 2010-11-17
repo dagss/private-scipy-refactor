@@ -1,0 +1,14 @@
+import os
+
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build()
+def mybuild(ctx):
+    env = {"PYEXT_LIBDIR": [ ctx.local_node.path_from(ctx.top_node)],
+           "PYEXT_LIBS": ['dfftpack', 'fftpack'],
+           "PYEXT_CPPPATH": [
+               os.path.join(ctx.local_node.abspath(), "src")]}
+    ctx.register_environment("_fftpack", env)
+    ctx.register_environment("convolve", env)

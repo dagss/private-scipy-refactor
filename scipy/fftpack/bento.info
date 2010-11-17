@@ -1,0 +1,17 @@
+Library:
+    Extension: convolve
+        Sources:
+            convolve.pyf,
+            src/convolve.c
+    Extension: _fftpack
+        Sources:
+            fftpack.pyf,
+            src/zfft.c,
+            src/drfft.c,
+            src/zrfft.c,
+            src/zfftnd.c,
+            src/dct.c.src
+    CompiledLibrary: dfftpack
+        Sources: src/dfftpack/*.f
+    CompiledLibrary: fftpack
+        Sources: src/fftpack/*.f

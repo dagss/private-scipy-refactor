@@ -1,0 +1,12 @@
+Library:
+    CompiledLibrary: arpack
+        Sources:
+            ARPACK/SRC/*.f,
+            ARPACK/UTIL/*.f,
+            ARPACK/LAPACK/clahqr.f,
+            ARPACK/LAPACK/dlahqr.f,
+            ARPACK/LAPACK/slahqr.f,
+            ARPACK/LAPACK/zlahqr.f
+    Extension: _arpack
+        Sources:
+            arpack.pyf.src

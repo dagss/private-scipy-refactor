@@ -1,0 +1,14 @@
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build()
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:]}
+    for flag in bld.env["LAPACK"]:
+        var = env.get("PYEXT_%s" % flag, [])
+        var.extend(bld.env["LAPACK"][flag][:])
+        env["PYEXT_%s" % flag] = var
+    ctx.register_environment("_iterative", env)

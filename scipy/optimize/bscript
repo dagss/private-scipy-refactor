@@ -1,0 +1,21 @@
+import copy
+from distutils import sysconfig
+
+from bento.commands.hooks \
+    import \
+        pre_build
+
+@pre_build()
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:],
+           "PYEXT_LIBDIR": [ctx.local_node.path_from(ctx.top_node)],
+           "PYEXT_LIBS": ['minpack', "rootfind"]}
+    for flag in bld.env["LAPACK"]:
+        var = env.get("PYEXT_%s" % flag, [])
+        var.extend(copy.deepcopy(bld.env["LAPACK"][flag]))
+        env["PYEXT_%s" % flag] = var
+
+    for name in ctx.local_pkg.extensions:
+        ctx.register_environment(name, env)

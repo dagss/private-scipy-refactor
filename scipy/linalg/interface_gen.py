@@ -61,7 +61,7 @@ def generic_expand(generic_interface,skip_names=[]):
                        'double complex':'void'}
     #2. get all subroutines
     subs = all_subroutines(generic_interface)
-    print len(subs)
+    #print len(subs)
     #loop through the subs
     type_exp = re.compile(r'<tchar=(.*?)>')
     TYPE_EXP = re.compile(r'<TCHAR=(.*?)>')
@@ -134,7 +134,7 @@ def process_includes(interface_in,sdir='.'):
     return interface_in
 
 def generate_interface(module_name,src_file,target_file,skip_names=[]):
-    print "generating",module_name,"interface"
+    #print "generating",module_name,"interface"
     f = open(src_file)
     generic_interface = f.read()
     f.close()

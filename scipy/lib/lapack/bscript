@@ -1,0 +1,33 @@
+from bento.commands.hooks \
+    import \
+        post_configure, pre_build
+from yaku.task_manager \
+    import \
+        set_file_hook, get_extension_hook, set_extension_hook
+
+@post_configure()
+def myconfigure(ctx):
+    f2py_tool = __import__("f2py_tool")
+    cfg = ctx.yaku_configure_ctx
+    ldir = ctx.local_node.path_from(ctx.top_node)
+
+    if not cfg.env.has_key("CLAPACK"):
+        set_file_hook(cfg, ldir + "/clapack.pyf.src",
+                      f2py_tool.fake_ftemplate_hook)
+
+@pre_build()
+def mybuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {"PYEXT_SHLINKFLAGS": bld.env["FC_RUNTIME_LDFLAGS"][:]}
+    for flag in bld.env["BLAS"]:
+        var = env.get("PYEXT_%s" % flag, [])
+        var.extend(bld.env["LAPACK"][flag][:])
+        env["PYEXT_%s" % flag] = var
+    ctx.register_environment("flapack", env)
+
+    f2py = bld.builders["f2py_tool"]
+    def builder(bld, extension, verbose):
+        return f2py.extension_fsources(extension.name,
+                extension.sources, env)
+    ctx.register_builder("calc_lwork", builder)

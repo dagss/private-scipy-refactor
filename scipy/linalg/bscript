@@ -1,0 +1,87 @@
+from bento.commands.hooks \
+    import \
+        post_configure, pre_build
+from yaku.task_manager \
+    import \
+        set_file_hook, get_extension_hook
+
+from interface_gen \
+    import \
+        generate_interface
+
+def generate_fake_interface(name, source, target):
+    """Generate a (fake) .pyf file from another pyf file (!)."""
+    # XXX handle skip names
+    generate_interface(name, source, target)
+
+    f = open(target, 'w')
+    f.write('python module '+name+'\n')
+    f.write('usercode void empty_module(void) {}\n')
+    f.write('interface\n')
+    f.write('subroutine empty_module()\n')
+    f.write('intent(c) empty_module\n')
+    f.write('end subroutine empty_module\n')
+    f.write('end interface\nend python module'+name+'\n')
+    f.close()
+
+    return 0
+
+# Hook to merge all included .pyf together between sending it to f2py
+# this hook is registered for full filenames instead of extension, as
+# the distutils build uses the same extension for both of them
+def fake_merge_f2py_hook(self, node):
+    return _merge_f2py_hook(self, node, fake=True)
+
+def merge_f2py_hook(self, node):
+    return _merge_f2py_hook(self, node, fake=False)
+
+def _merge_f2py_hook(self, node, fake=True):
+    # XXX: Fix this by structuring f2py_tool better
+    f2py_tool = __import__("f2py_tool")
+    modulename = f2py_tool.modulename
+
+    f2py_hook = get_extension_hook(".pyf")
+    base = modulename(node)
+    target = node.parent.declare(base + ".pyf")
+    if fake:
+        generate_fake_interface(base, node.abspath(), target.abspath())
+    else:
+        generate_interface(base, node.abspath(), target.abspath())
+    ret = f2py_hook(self, target)
+    return ret
+
+@post_configure()
+def myconfigure(ctx):
+    cfg = ctx.yaku_configure_ctx
+    ldir = ctx.local_node.path_from(ctx.top_node)
+
+    set_file_hook(cfg, ldir + "/generic_fblas.pyf", merge_f2py_hook)
+    set_file_hook(cfg, ldir + "/generic_flapack.pyf", merge_f2py_hook)
+
+    if cfg.env.has_key("CBLAS"):
+        set_file_hook(cfg, ldir + "/generic_cblas.pyf", merge_f2py_hook)
+    else:
+        set_file_hook(cfg, ldir + "/generic_cblas.pyf", fake_merge_f2py_hook)
+    if cfg.env.has_key("CLAPACK"):
+        set_file_hook(cfg, ldir + "/generic_clapack.pyf", merge_f2py_hook)
+    else:
+        set_file_hook(cfg, ldir + "/generic_clapack.pyf", fake_merge_f2py_hook)
+
+@pre_build()
+def myprebuild(ctx):
+    bld = ctx.yaku_build_ctx
+
+    env = {}
+    for flag in bld.env["LAPACK"]:
+        env["PYEXT_%s" % flag] = bld.env["LAPACK"][flag]
+    env["PYEXT_SHLINKFLAGS"] = bld.env["FC_RUNTIME_LDFLAGS"]
+
+    for name in ctx.local_pkg.extensions:
+        ctx.register_environment(name, env)
+
+    f2py = bld.builders["f2py_tool"]
+    def builder(bld, extension, verbose):
+        return f2py.extension_fsources(extension.name,
+                extension.sources, env)
+    ctx.register_builder("calc_lwork", builder)
+    ctx.register_builder("_flinalg", builder)

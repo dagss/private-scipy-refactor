@@ -1,0 +1,5 @@
+Recurse:
+    matlab
+
+Library:
+    Packages: matlab, arff

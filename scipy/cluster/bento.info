@@ -1,0 +1,5 @@
+Library:
+    Extension: _vq
+        Sources: src/vq_module.c, src/vq.c
+    Extension: _hierarchy_wrap
+        Sources: src/hierarchy_wrap.c, src/hierarchy.c

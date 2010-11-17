@@ -1,0 +1,123 @@
+Name: scipy
+Version: 0.9.0.dev
+Summary: SciPy: Scientific Library for Python
+Url: http://www.scipy.org
+DownloadUrl: http://sourceforge.net/project/showfiles.php?group_id=27747&package_id=19531
+Description:
+    SciPy (pronounced "Sigh Pie") is open-source software for mathematics,
+    science, and engineering. The SciPy library
+    depends on NumPy, which provides convenient and fast N-dimensional
+    array manipulation. The SciPy library is built to work with NumPy
+    arrays, and provides many user-friendly and efficient numerical
+    routines such as routines for numerical integration and optimization.
+    Together, they run on all popular operating systems, are quick to
+    install, and are free of charge.  NumPy and SciPy are easy to use,
+    but powerful enough to be depended upon by some of the world's
+    leading scientists and engineers. If you need to manipulate
+    numbers on a computer and display or publish the results,
+    give SciPy a try!
+    
+Maintainer: SciPy Developers
+MaintainerEmail: scipy-dev@scipy.org
+License: BSD
+Platforms: Windows,Linux,Solaris,Mac OS-X,Unix
+Classifiers:
+    Development Status :: 4 - Beta,
+    Intended Audience :: Science/Research,
+    Intended Audience :: Developers,
+    License :: OSI Approved,
+    Programming Language :: C,
+    Programming Language :: Python,
+    Topic :: Software Development,
+    Topic :: Scientific/Engineering,
+    Operating System :: Microsoft :: Windows,
+    Operating System :: POSIX,
+    Operating System :: Unix,
+    Operating System :: MacOS
+
+HookFile:
+    bscript,
+    scipy/fftpack/bscript,
+    scipy/interpolate/bscript,
+    scipy/integrate/bscript,
+    scipy/lib/blas/bscript,
+    scipy/lib/lapack/bscript,
+    scipy/linalg/bscript,
+    scipy/optimize/bscript,
+    scipy/sparse/linalg/dsolve/bscript,
+    scipy/sparse/linalg/eigen/arpack/bscript,
+    scipy/sparse/linalg/isolve/bscript,
+    scipy/signal/bscript,
+    scipy/special/bscript,
+    scipy/stats/bscript
+
+Recurse:
+    scipy/cluster,
+    scipy/fftpack,
+    scipy/integrate,
+    scipy/interpolate,
+    scipy/io,
+    scipy/lib,
+    scipy/linalg,
+    scipy/optimize,
+    scipy/signal,
+    scipy/sparse,
+    scipy/spatial,
+    scipy/special,
+    scipy/stats
+
+DataFiles: tests
+    TargetDir: $sitedir/scipy
+    SourceDir: scipy
+    Files:
+        cluster/tests/*.py,
+        cluster/tests/*.txt,
+        fftpack/tests/*.py,
+        fftpack/tests/*.npz,
+        integrate/tests/*.py,
+        interpolate/tests/*.py,
+        io/tests/*.py,
+        io/tests/data/*.wav,
+        io/tests/data/*.nc,
+        io/arff/tests/*.py,
+        io/arff/tests/data/*.arff,
+        io/matlab/tests/*.py,
+        io/matlab/tests/data/*.mat,
+        io/matlab/tests/data/*.txt,
+        lib/blas/tests/*.py,
+        lib/lapack/tests/*.py,
+        linalg/tests/*.py,
+        optimize/tests/*.py,
+        signal/tests/*.py,
+        spatial/tests/*.py,
+        sparse/linalg/eigen/arpack/tests/*.py,
+        sparse/linalg/eigen/lobpcg/tests/*.py,
+        sparse/linalg/isolve/tests/*.py,
+        sparse/linalg/tests/*.py,
+        sparse/linalg/dsolve/umfpack/tests/*.py,
+        sparse/linalg/dsolve/tests/*.py,
+        sparse/tests/*.py,
+        spatial/tests/*.py,
+        spatial/tests/*.txt,
+        special/tests/*.py,
+        special/tests/data/boost.npz,
+        stats/tests/*.py
+
+Library:
+    Packages:
+        scipy,
+        scipy.cluster,
+        scipy.constants,
+        scipy.fftpack,
+        scipy.io,
+        scipy.integrate,
+        scipy.interpolate,
+        scipy.lib,
+        scipy.linalg,
+        scipy.misc,
+        scipy.optimize,
+        scipy.signal,
+        scipy.spatial,
+        scipy.sparse,
+        scipy.special,
+        scipy.stats
