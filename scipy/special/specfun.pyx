@@ -1,14 +1,141 @@
 #cython: ccomplex=True
 
 # Fwrap configuration:
-# Fwrap: version 0.2.0dev_3d6e890
-# Fwrap: git-head b51fddcff1c0269f54ad84990151420ba5e2417e
-# Fwrap: wraps specfun.pyf
-# Fwrap:     sha1 4c6fa948555907dcac9df3944b27f272f40ee224
+# Fwrap: version 0.2.0dev_37a14f7
+# Fwrap: vcs git
+# Fwrap:     head 208995e59bee1248a0cea074daef188a080ab943
+# Fwrap: wraps specfun/specfun.f
+# Fwrap:     sha1 f9d6976b6f8026600b0d4586fa15ad628b2fc87c
+# Fwrap: exclude airya
+# Fwrap: exclude airyb
+# Fwrap: exclude ajyik
+# Fwrap: exclude aswfa
+# Fwrap: exclude beta
+# Fwrap: exclude bjndd
+# Fwrap: exclude cbk
+# Fwrap: exclude cchg
+# Fwrap: exclude cerf
+# Fwrap: exclude cerror
+# Fwrap: exclude cfc
+# Fwrap: exclude cfs
+# Fwrap: exclude cgama
+# Fwrap: exclude ch12n
+# Fwrap: exclude chgu
+# Fwrap: exclude chgubi
+# Fwrap: exclude chguit
+# Fwrap: exclude chgul
+# Fwrap: exclude chgus
+# Fwrap: exclude cik01
+# Fwrap: exclude ciklv
+# Fwrap: exclude cikna
+# Fwrap: exclude ciknb
+# Fwrap: exclude cikva
+# Fwrap: exclude cikvb
+# Fwrap: exclude cisia
+# Fwrap: exclude cisib
+# Fwrap: exclude cjk
+# Fwrap: exclude cjy01
+# Fwrap: exclude cjylv
+# Fwrap: exclude cjyna
+# Fwrap: exclude cjynb
+# Fwrap: exclude cjyva
+# Fwrap: exclude cjyvb
+# Fwrap: exclude comelp
+# Fwrap: exclude cpdla
+# Fwrap: exclude cpdsa
+# Fwrap: exclude cpsi
+# Fwrap: exclude cv0
+# Fwrap: exclude cva2
+# Fwrap: exclude cvf
+# Fwrap: exclude cvql
+# Fwrap: exclude cvqm
+# Fwrap: exclude cy01
+# Fwrap: exclude dvla
+# Fwrap: exclude dvsa
+# Fwrap: exclude e1xa
+# Fwrap: exclude e1xb
+# Fwrap: exclude e1z
+# Fwrap: exclude eix
+# Fwrap: exclude eixz
+# Fwrap: exclude elit
+# Fwrap: exclude elit3
+# Fwrap: exclude envj
+# Fwrap: exclude enxa
+# Fwrap: exclude enxb
+# Fwrap: exclude error
+# Fwrap: exclude fcs
+# Fwrap: exclude ffk
+# Fwrap: exclude gaih
+# Fwrap: exclude gam0
+# Fwrap: exclude gamma2
+# Fwrap: exclude gmn
+# Fwrap: exclude hygfx
+# Fwrap: exclude hygfz
+# Fwrap: exclude ik01a
+# Fwrap: exclude ik01b
+# Fwrap: exclude ikna
+# Fwrap: exclude iknb
+# Fwrap: exclude ikv
+# Fwrap: exclude incob
+# Fwrap: exclude incog
+# Fwrap: exclude itairy
+# Fwrap: exclude itika
+# Fwrap: exclude itikb
+# Fwrap: exclude itjya
+# Fwrap: exclude itjyb
+# Fwrap: exclude itsh0
+# Fwrap: exclude itsl0
+# Fwrap: exclude itth0
+# Fwrap: exclude ittika
+# Fwrap: exclude ittikb
+# Fwrap: exclude ittjya
+# Fwrap: exclude ittjyb
+# Fwrap: exclude jelp
+# Fwrap: exclude jy01a
+# Fwrap: exclude jy01b
+# Fwrap: exclude jyna
+# Fwrap: exclude jynb
+# Fwrap: exclude jynbh
+# Fwrap: exclude jyndd
+# Fwrap: exclude jyv
+# Fwrap: exclude klvna
+# Fwrap: exclude klvnb
+# Fwrap: exclude kmn
+# Fwrap: exclude lgama
+# Fwrap: exclude lpmv
+# Fwrap: exclude msta1
+# Fwrap: exclude msta2
+# Fwrap: exclude mtu0
+# Fwrap: exclude mtu12
+# Fwrap: exclude pbwa
+# Fwrap: exclude psi_spec
+# Fwrap: exclude qstar
+# Fwrap: exclude refine
+# Fwrap: exclude rmn1
+# Fwrap: exclude rmn2l
+# Fwrap: exclude rmn2so
+# Fwrap: exclude rmn2sp
+# Fwrap: exclude rswfo
+# Fwrap: exclude rswfp
+# Fwrap: exclude scka
+# Fwrap: exclude sckb
+# Fwrap: exclude sdmn
+# Fwrap: exclude stvh0
+# Fwrap: exclude stvh1
+# Fwrap: exclude stvhv
+# Fwrap: exclude stvl0
+# Fwrap: exclude stvl1
+# Fwrap: exclude stvlv
+# Fwrap: exclude vvla
+# Fwrap: exclude vvsa
 # Fwrap: f77binding True
+# Fwrap: auxiliary specfun.pxd
+# Fwrap: auxiliary specfun_fc.f
+# Fwrap: auxiliary specfun_fc.h
+# Fwrap: auxiliary specfun_fc.pxd
 
 """
-The specfun module was generated with Fwrap v0.2.0dev_3d6e890.
+The specfun module was generated with Fwrap v0.2.0dev_37a14f7.
 
 Below is a listing of functions and data types.
 For usage information see the function docstrings.
@@ -74,8 +201,6 @@ np.import_array()
 include 'fwrap_ktp.pxi'
 cdef extern from "string.h":
     void *memcpy(void *dest, void *src, size_t n)
-cdef extern from "math.h":
-    double fabs(double x)
 cpdef api object clqmn(fwi_integer_t m, fwi_integer_t n, fwc_complex_x16_t z, object cqm=None, object cqd=None):
     """
     clqmn(m, n, z, cqm, cqd) -> (cqm, cqd)
