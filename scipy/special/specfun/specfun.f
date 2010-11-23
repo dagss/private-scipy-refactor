@@ -367,6 +367,7 @@ C
         INTEGER P(1400), P1(70)
         DIMENSION N(1400),M(1400),ZO(0:1400),N1(70),M1(70),
      &            ZOC(0:70),BJ(101),DJ(101),FJ(101)
+        X = 0
         IF (NT.LT.600) THEN
            XM=-1.0+2.248485*NT**0.5-.0159382*NT+3.208775E-4
      &        *NT**1.5
@@ -429,6 +430,10 @@ C
 40               P(K)=P1(K)
               L1=0
            ELSE IF (L0.NE.0) THEN
+              IF ((L0+L1).LE.0) THEN
+                 WRITE (*,*) 'JDZO assumption failed'
+                 RETURN
+              ENDIF
               IF (ZO(L0).GE.ZOC(L1)) THEN
                  ZO(L0+L1)=ZO(L0)
                  N(L0+L1)=N(L0)
