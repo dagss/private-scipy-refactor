@@ -3,11 +3,15 @@ out = 'build'
 
 def options(opt):
     opt.load('python')
+    opt.load('cython')
     opt.load('compiler_c')
+    opt.load('compiler_fc')
 
 def configure(conf):
     conf.load('compiler_c')
+    conf.load('compiler_fc')
     conf.load('python')
+    conf.load('cython')
 
     # TODO: what is the minimim CPython version supported?
     conf.check_python_version((2,4,0))
@@ -17,17 +21,59 @@ def configure(conf):
     conf.get_numpy_includes()
 
 def build(bld):
+
+    def bld_lib(features, glob, cflags, target):
+        bld(
+            features = features,
+            source   = bld.path.ant_glob(glob),
+            cflags   = cflags,
+            target   = target,
+            use      = 'PYEXT NUMPY')
+
+
+    # C libraries
+    bld_lib('c cstlib', 'cephes/*.c', bld.env.CFLAGS_cshlib, 'stcephes')
+    bld_lib('c cstlib', 'c_misc/*.c', bld.env.CFLAGS_cshlib, 'stc_misc')
+
+    # fortran libraries
+    bld_lib('fc fcstlib', 'mach/*.f', bld.env.CFLAGS_fcshlib, 'stmach')
+    bld_lib('fc fcstlib', 'toms/*.f', bld.env.CFLAGS_fcshlib, 'sttoms')
+    bld_lib('fc fcstlib', 'amos/*.f', bld.env.CFLAGS_fcshlib, 'stamos')
+    bld_lib('fc fcstlib', 'cdflib/*.f', bld.env.CFLAGS_fcshlib, 'stcdf')
+    bld_lib('fc fcstlib', 'specfun/*.f', bld.env.CFLAGS_fcshlib, 'stspecfunlib')
+
+
+    # Cython extensions
     bld(
-        features = 'c cstlib',
-        source   = bld.path.ant_glob('cephes/*.c'),
-        target   = 'stcephes',
-        use      = 'PYEXT')
+        features = 'c cshlib pyext',
+        source   = 'orthogonal_eval.pyx',
+        target   = 'orthogonal_eval',
+        use = 'NUMPY',
+        )
 
     bld(
         features = 'c cshlib pyext',
-        source   = '_cephesmodule.c',
+        source   = 'lambertw.pyx',
+        target   = 'lambertw',
+        use = 'NUMPY',
+        )
+
+    cephes_src = ['_cephesmodule.c', 'amos_wrappers.c', 'specfun_wrappers.c',
+                  'toms_wrappers.c','cdf_wrappers.c','ufunc_extras.c']
+
+    bld(
+        features = 'c cshlib pyext',
+        source   = cephes_src,
         target   = '_cephes',
-        use      = 'stcephes')
+        use      = 'stamos sttoms stc_misc stcephes stmach stcdf stspecfunlib',
+        )
+
+    bld(
+        features = 'fc c cshlib pyext',
+        source   = 'specfun.pyx specfun_fc.f',
+        target = 'specfun',
+        use    = 'stspecfunlib NUMPY',
+        )
 
 #-----------------------------------------------------------------------------
 # configuration helper functions
