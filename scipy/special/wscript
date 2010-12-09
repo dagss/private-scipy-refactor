@@ -24,6 +24,8 @@ def configure(conf):
     conf.check_numpy_version(minver=(1,3))
     conf.get_numpy_includes()
 
+    conf.add_os_flags('FCFLAGS')
+
 def build(bld):
 
     def bld_lib(features, glob, cflags, target, use=None):
