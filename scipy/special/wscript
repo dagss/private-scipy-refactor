@@ -23,6 +23,7 @@ def configure(conf):
     conf.check_python_module('numpy')
     conf.check_numpy_version(minver=(1,3))
     conf.get_numpy_includes()
+    conf.get_npymath()
 
     conf.add_os_flags('FCFLAGS')
 
@@ -61,7 +62,7 @@ def build(bld):
         features = 'c cshlib pyext',
         source   = 'orthogonal_eval.pyx',
         target   = 'orthogonal_eval',
-        use = 'NUMPY',
+        use = 'NUMPY NPYMATH',
         install_path = install_path,
         )
 
@@ -69,7 +70,7 @@ def build(bld):
         features = 'c cshlib pyext',
         source   = 'lambertw.pyx',
         target   = 'lambertw',
-        use = 'NUMPY',
+        use = 'NUMPY NPYMATH',
         install_path = install_path,
         )
 
@@ -120,5 +121,22 @@ def get_numpy_includes(conf):
             ['numpy.get_include()'], ['import numpy'])
     conf.env.INCLUDES_NUMPY = np_includes
     conf.end_msg('ok (%s)' % np_includes)
+
+@conf
+def get_npymath(conf):
+    conf.start_msg('Checking libnpymath')
+
+    v = conf.get_python_variables(conf.env['PYTHON'],
+                                  ['"|".join(info["%s"])' % x for x in ['include_dirs',
+                                                                        'define_macros',
+                                                                        'libraries', 
+                                                                        'library_dirs']],
+                                  ['from numpy.distutils.misc_util import get_info',
+                                   'info = get_info("npymath")'])
+    (conf.env.INCLUDES_NPYMATH,
+     _, # TODO: defines
+     conf.env.LIB_NPYMATH,
+     conf.env.LIBPATH_NPYMATH) = [x.split('|') for x in v]
+    conf.end_msg('ok (%s)')
 
 # vim:ft=python
