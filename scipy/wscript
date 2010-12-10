@@ -1,0 +1,17 @@
+
+def recurse(ctx):
+    ctx.recurse('special')
+
+def options(ctx):
+    recurse(ctx)
+
+def configure(ctx):
+    recurse(ctx)
+
+def build(bld):
+    # Python files
+    bld(features='py', source=bld.path.ant_glob('*.py'),
+        install_path='${PYTHONDIR}/scipy')
+    
+    # Sub-packages
+    recurse(bld)
