@@ -46,7 +46,7 @@ rules = {
 # Hash db
 #
 def load_hashes(filename):
-    # Return { filename : sha1-hash }
+    # Return { filename : (sha1 of input, sha1 of output) }
     if os.path.isfile(filename):
         with file(filename) as f:
             hashes = cPickle.load(f)
@@ -104,8 +104,8 @@ def git_is_child(parent_sha, child_sha):
 def process(path, fromfile, tofile, processor_function, hash_db):
     fullfrompath = os.path.join(path, fromfile)
     fulltopath = os.path.join(path, tofile)
-    sha1 = sha1_of_file(fullfrompath)
-    if sha1 == hash_db.get(fullfrompath, None):
+    current_hash = (sha1_of_file(fullfrompath), sha1_of_file(fulltopath))
+    if current_hash == hash_db.get(fullfrompath, None):
         print '%s has not changed' % fullfrompath
         return
 
@@ -117,7 +117,7 @@ def process(path, fromfile, tofile, processor_function, hash_db):
         # check with revision control system whether we need to
         # update
         if git_is_child(from_sha, to_sha):
-            hash_db[fullfrompath] = sha1
+            hash_db[fullfrompath] = current_hash
             print '%s is up to date (according to git)' % fullfrompath
             return
 
@@ -126,7 +126,7 @@ def process(path, fromfile, tofile, processor_function, hash_db):
         os.chdir(path)
         print 'Processing %s' % fullfrompath
         processor_function(fromfile, tofile)
-        hash_db[fullfrompath] = sha1
+        hash_db[fullfrompath] = current_hash
     finally:
         os.chdir(orig_cwd)
 
