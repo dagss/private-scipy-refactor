@@ -11,10 +11,9 @@ Simple N-D interpolation
 #
 
 #
-# Note: this file should be run through the Mako template engine before
-#       feeding it to Cython.
-#
-#       Run ``generate_qhull.py`` to regenerate the ``qhull.c`` file
+# Note: this file should be run through the Tempita template engine before
+#       feeding it to Cython. Run the "cythonize" script to regenerate
+#       interpnd.pyx and interpnd.c.
 #
 
 import numpy as np
@@ -195,15 +194,15 @@ class LinearNDInterpolator(NDInterpolatorBase):
         NDInterpolatorBase.__init__(self, points, values, fill_value=fill_value)
         self.tri = qhull.Delaunay(self.points)
 
-% for DTYPE, CDTYPE in zip(["double", "complex"], ["double", "double complex"]):
+{{for DTYPE, CDTYPE in zip(["double", "complex"], ["double", "double complex"])}}
     @cython.boundscheck(False)
-    def _evaluate_${DTYPE}(self, np.ndarray[np.double_t, ndim=2] xi):
-        cdef np.ndarray[np.${DTYPE}_t, ndim=2] values = self.values
-        cdef np.ndarray[np.${DTYPE}_t, ndim=2] out
+    def _evaluate_{{DTYPE}}(self, np.ndarray[np.double_t, ndim=2] xi):
+        cdef np.ndarray[np.{{DTYPE}}_t, ndim=2] values = self.values
+        cdef np.ndarray[np.{{DTYPE}}_t, ndim=2] out
         cdef np.ndarray[np.double_t, ndim=2] points = self.points
         cdef np.ndarray[np.npy_int, ndim=2] vertices = self.tri.vertices
         cdef double c[NPY_MAXDIMS]
-        cdef ${CDTYPE} fill_value
+        cdef {{CDTYPE}} fill_value
         cdef int i, j, k, m, ndim, isimplex, inside, start, nvalues
         cdef qhull.DelaunayInfo_t *info
 
@@ -213,7 +212,7 @@ class LinearNDInterpolator(NDInterpolatorBase):
 
         info = qhull._get_delaunay_info(self.tri, 1, 0)
 
-        out = np.zeros((xi.shape[0], self.values.shape[1]), dtype=np.${DTYPE})
+        out = np.zeros((xi.shape[0], self.values.shape[1]), dtype=np.{{DTYPE}})
         nvalues = out.shape[1]
 
         eps = np.finfo(np.double).eps * 100
@@ -232,35 +231,35 @@ class LinearNDInterpolator(NDInterpolatorBase):
                 if isimplex == -1:
                     # don't extrapolate
                     for k in xrange(nvalues):
-% if DTYPE == "double":
+{{if DTYPE == "double"}}
                         out[i,k] = fill_value
-% else:
+{{else}}
                         out[i,k].real = fill_value.real
                         out[i,k].imag = fill_value.imag
-% endif
+{{endif}}
                     continue
 
                 for k in xrange(nvalues):
-% if DTYPE == "double":
+{{if DTYPE == "double"}}
                     out[i,k] = 0
-% else:
+{{else}}
                     out[i,k].real = 0
                     out[i,k].imag = 0
-% endif
+{{endif}}
 
                 for j in xrange(ndim+1):
                     for k in xrange(nvalues):
                         m = vertices[isimplex,j]
-% if DTYPE == "double":
+{{if DTYPE == "double"}}
                         out[i,k] += c[j] * values[m,k]
-% else:
+{{else}}
                         out[i,k].real += c[j] * values[m, k].real
                         out[i,k].imag += c[j] * values[m, k].imag
-% endif
+{{endif}}
 
         free(<void*>info)
         return out
-% endfor
+{{endfor}}
 
 
 #------------------------------------------------------------------------------
@@ -502,14 +501,14 @@ def estimate_gradients_2d_global(tri, y, maxiter=400, tol=1e-6):
 #------------------------------------------------------------------------------
 
 
-% for DTYPE, CDTYPE in zip(["double", "complex"], ["double", "double complex"]):
+{{for DTYPE, CDTYPE in zip(["double", "complex"], ["double", "double complex"])}}
 
 @cython.cdivision(True)
-cdef ${CDTYPE} _clough_tocher_2d_single_${DTYPE}(qhull.DelaunayInfo_t *d,
-                                                 int isimplex,
-                                                 double *b,
-                                                 ${CDTYPE} *f,
-                                                 ${CDTYPE} *df) nogil:
+cdef {{CDTYPE}} _clough_tocher_2d_single_{{DTYPE}}(qhull.DelaunayInfo_t *d,
+                                                   int isimplex,
+                                                   double *b,
+                                                   {{CDTYPE}} *f,
+                                                   {{CDTYPE}} *df) nogil:
     """
     Evaluate Clough-Tocher interpolant on a 2D triangle.
 
@@ -542,19 +541,19 @@ cdef ${CDTYPE} _clough_tocher_2d_single_${DTYPE}(qhull.DelaunayInfo_t *d,
        Computer Aided Geometric Design, 3, 83 (1986).
 
     """
-    cdef ${CDTYPE} \
+    cdef {{CDTYPE}} \
          c3000, c0300, c0030, c0003, \
          c2100, c2010, c2001, c0210, c0201, c0021, \
          c1200, c1020, c1002, c0120, c0102, c0012, \
          c1101, c1011, c0111
-    cdef ${CDTYPE} \
+    cdef {{CDTYPE}} \
          f1, f2, f3, df12, df13, df21, df23, df31, df32
     cdef double \
          g1, g2, g3
     cdef double \
          e12x, e12y, e23x, e23y, e31x, e31y, \
          e14x, e14y, e24x, e24y, e34x, e34y
-    cdef ${CDTYPE} w
+    cdef {{CDTYPE}} w
     cdef double minval
     cdef double b1, b2, b3, b4
     cdef int k, itri
@@ -736,7 +735,7 @@ cdef ${CDTYPE} _clough_tocher_2d_single_${DTYPE}(qhull.DelaunayInfo_t *d,
 
     return w
 
-% endfor
+{{endfor}}
 
 class CloughTocher2DInterpolator(NDInterpolatorBase):
     """
@@ -806,20 +805,20 @@ class CloughTocher2DInterpolator(NDInterpolatorBase):
         self.grad = estimate_gradients_2d_global(self.tri, self.values,
                                                  tol=tol, maxiter=maxiter)
 
-% for DTYPE, CDTYPE in zip(["double", "complex"], ["double", "double complex"]):
+{{for DTYPE, CDTYPE in zip(["double", "complex"], ["double", "double complex"])}}
 
     @cython.boundscheck(False)
-    def _evaluate_${DTYPE}(self, np.ndarray[np.double_t, ndim=2] xi):
-        cdef np.ndarray[np.${DTYPE}_t, ndim=2] values = self.values
-        cdef np.ndarray[np.${DTYPE}_t, ndim=3] grad = self.grad
-        cdef np.ndarray[np.${DTYPE}_t, ndim=2] out
+    def _evaluate_{{DTYPE}}(self, np.ndarray[np.double_t, ndim=2] xi):
+        cdef np.ndarray[np.{{DTYPE}}_t, ndim=2] values = self.values
+        cdef np.ndarray[np.{{DTYPE}}_t, ndim=3] grad = self.grad
+        cdef np.ndarray[np.{{DTYPE}}_t, ndim=2] out
         cdef np.ndarray[np.double_t, ndim=2] points = self.points
         cdef np.ndarray[np.npy_int, ndim=2] vertices = self.tri.vertices
         cdef double c[NPY_MAXDIMS]
-        cdef ${CDTYPE} f[NPY_MAXDIMS+1]
-        cdef ${CDTYPE} df[2*NPY_MAXDIMS+2]
-        cdef ${CDTYPE} w
-        cdef ${CDTYPE} fill_value
+        cdef {{CDTYPE}} f[NPY_MAXDIMS+1]
+        cdef {{CDTYPE}} df[2*NPY_MAXDIMS+2]
+        cdef {{CDTYPE}} w
+        cdef {{CDTYPE}} fill_value
         cdef int i, j, k, m, ndim, isimplex, inside, start, nvalues
         cdef qhull.DelaunayInfo_t *info
 
@@ -829,7 +828,7 @@ class CloughTocher2DInterpolator(NDInterpolatorBase):
 
         info = qhull._get_delaunay_info(self.tri, 1, 1)
 
-        out = np.zeros((xi.shape[0], self.values.shape[1]), dtype=np.${DTYPE})
+        out = np.zeros((xi.shape[0], self.values.shape[1]), dtype=np.{{DTYPE}})
         nvalues = out.shape[1]
 
         eps = np.finfo(np.double).eps * 100
@@ -847,39 +846,39 @@ class CloughTocher2DInterpolator(NDInterpolatorBase):
                 if isimplex == -1:
                     # outside triangulation
                     for k in xrange(nvalues):
-% if DTYPE == "double":
+{{if DTYPE == "double"}}
                         out[i,k] = fill_value
-% else:
+{{else}}
                         out[i,k].real = fill_value.real
                         out[i,k].imag = fill_value.imag
-% endif
+{{endif}}
                     continue
 
                 for k in xrange(nvalues):
                     for j in xrange(ndim+1):
-% if DTYPE == "double":
+{{if DTYPE == "double"}}
                         f[j] = values[vertices[isimplex,j],k]
                         df[2*j] = grad[vertices[isimplex,j],k,0]
                         df[2*j+1] = grad[vertices[isimplex,j],k,1]
-% else:
+{{else}}
                         f[j].real = values[vertices[isimplex,j],k].real
                         f[j].imag = values[vertices[isimplex,j],k].imag
                         df[2*j].real = grad[vertices[isimplex,j],k,0].real
                         df[2*j].imag = grad[vertices[isimplex,j],k,0].imag
                         df[2*j+1].real = grad[vertices[isimplex,j],k,1].real
                         df[2*j+1].imag = grad[vertices[isimplex,j],k,1].imag
-% endif
+{{endif}}
 
-                    w = _clough_tocher_2d_single_${DTYPE}(info, isimplex, c,
-                                                          f, df)
-% if DTYPE == "double":
+                    w = _clough_tocher_2d_single_{{DTYPE}}(info, isimplex, c,
+                                                           f, df)
+{{if DTYPE == "double"}}
                     out[i,k] = w
-% else:
+{{else}}
                     out[i,k].real = w.real
                     out[i,k].imag = w.imag
-% endif
+{{endif}}
 
         free(<void*>info)
         return out
 
-% endfor
+{{endfor}}
