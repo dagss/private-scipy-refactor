@@ -101,10 +101,16 @@ def git_is_child(parent_sha, child_sha):
 #
 # Main program
 #
+
+def get_hash(frompath, topath):
+    from_hash = sha1_of_file(frompath)
+    to_hash = sha1_of_file(topath) if os.path.exists(topath) else None
+    return (from_hash, to_hash)
+
 def process(path, fromfile, tofile, processor_function, hash_db):
     fullfrompath = os.path.join(path, fromfile)
     fulltopath = os.path.join(path, tofile)
-    current_hash = (sha1_of_file(fullfrompath), sha1_of_file(fulltopath))
+    current_hash = get_hash(fullfrompath, fulltopath)
     if current_hash == hash_db.get(fullfrompath, None):
         print '%s has not changed' % fullfrompath
         return
@@ -126,9 +132,12 @@ def process(path, fromfile, tofile, processor_function, hash_db):
         os.chdir(path)
         print 'Processing %s' % fullfrompath
         processor_function(fromfile, tofile)
-        hash_db[fullfrompath] = current_hash
     finally:
         os.chdir(orig_cwd)
+    # changed target file, recompute hash
+    current_hash = get_hash(fullfrompath, fulltopath)
+    # store hash in db
+    hash_db[fullfrompath] = current_hash
 
 hash_db = load_hashes(HASH_FILE)
 
